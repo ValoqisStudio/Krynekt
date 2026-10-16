@@ -5539,6 +5539,13 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* ===== Nacht-Fülllicht für die Spielfigur (wie GTA V): warmes Licht von den Laternen in der Nähe + schwaches Kamera-Fülllicht, damit Figuren nachts keine schwarzen Silhouetten sind ===== */
+{const up=Engine.prototype.update;let FL=null;Engine.prototype.update=function(dt){up.call(this,dt);try{const P=this.player,c=this.camera;if(!P||!c)return;
+ if(!FL){FL=new THREE.PointLight(0xffb470,0,9,1.6);FL.castShadow=false;this.scene.add(FL)}
+ const n=1-GU.uDay.value;if(n<.03||this.zone){FL.intensity=0;return}
+ let pl=0;for(const q of this.city.lamps||[]){const d=(q[0]-P.x)**2+(q[1]-P.z)**2;if(d<400)pl+=Math.exp(-d/30)}
+ const dx=c.position.x-P.x,dz=c.position.z-P.z,L=Math.hypot(dx,dz)||1;FL.position.set(P.x+dx/L*2.2,P.y+2.6,P.z+dz/L*2.2);
+ FL.intensity=n*(.55+1.6*Math.min(pl,1))}catch(x){}}}
 /* Belebte Bürgersteige wie in GTA: weit entfernte, unsichtbare Spaziergänger werden in Blöcke rund um den Spieler versetzt (außer Sicht) */
 const Crowd={t:0,
  update(dt){const E=VX,P=E.player;if(!E.playing||E.zone||(this.t-=dt)>0)return;this.t=.7;const T=P.car||P;let moved=0;
