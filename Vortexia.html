@@ -5530,6 +5530,27 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* ===== Feuertreppen wie in Downtown Los Santos: an Backstein- und manchen Putzhäusern, pro Etage Plattform + Geländer + schräge Treppe,
+   unten eine hochgeklappte Leiter. Alles in EINEM Mesh (ein Draw-Call), wirft Schatten. ===== */
+const FireEsc={
+ build(city){const L=[],M=new THREE.Matrix4(),R=new THREE.Matrix4(),T=new THREE.Matrix4();
+  const box=(w,h,d,x,y,z,ry,ax,lx,ly,lz,rx)=>{const g=new THREE.BoxGeometry(w,h,d);if(rx)g.applyMatrix4(R.makeRotationX(rx));g.translate(lx,ly,lz);g.applyMatrix4(M.makeRotationY(ry).setPosition(x,y,z));L.push(g)};
+  for(const b of city.bld){const fr=v=>v-Math.floor(v),ty=fr(b.seed*7.13+.31),fk=ty<.34?0:ty<.67?1:2;
+   if(b.i%7==5||b.i%2==0||!(fk==2||fk==1&&fr(b.seed*11.37+.17)<.5))continue;
+   const sideX=b.i%4==1,ry=sideX?Math.PI/2:0,fx=sideX?b.x+b.w/2:b.x,fz=sideX?b.z:b.z+b.d/2,len=Math.min(sideX?b.d:b.w,22)*.42,top=Math.min(b.t*.62,26);
+   const W=Math.max(4.2,Math.min(6.5,len)),off=(Math.sin(b.seed*91.7)*.5)*((sideX?b.d:b.w)*.3);
+   for(let y=4.6,k=0;y<top;y+=3.3,k++){
+    box(W,.07,1.15,fx,y,fz,ry,0,off,0,.6);                                   /* Gitter-Plattform */
+    box(W,.05,.05,fx,y+1.0,fz,ry,0,off,0,1.16);box(.05,1,.05,fx,y+.5,fz,ry,0,off-W/2,0,1.16);box(.05,1,.05,fx,y+.5,fz,ry,0,off+W/2,0,1.16);
+    box(W,.04,.04,fx,y+.5,fz,ry,0,off,0,1.16);
+    for(let s=-W/2+.6;s<W/2;s+=.6)box(.025,1,.025,fx,y+.5,fz,ry,0,off+s,0,1.16);
+    box(.07,.6,.9,fx,y-.35,fz,ry,0,off-W/2+.1,0,.6);box(.07,.6,.9,fx,y-.35,fz,ry,0,off+W/2-.1,0,.6);  /* Konsolen */
+    if(y+3.3<top){const dir=k%2?1:-1,sl=Math.hypot(W*.62,3.3),a=Math.atan2(3.3,W*.62);const g=new THREE.BoxGeometry(sl,.06,.7);g.applyMatrix4(R.makeRotationZ(-dir*a));
+     g.translate(off-dir*0,1.65,.55);g.applyMatrix4(M.makeRotationY(ry).setPosition(fx,y,fz));L.push(g)}}
+   box(.06,2.6,.06,fx,3.2,fz,ry,0,off+W/2-.5,0,1.1);box(.06,2.6,.06,fx,3.2,fz,ry,0,off+W/2-.95,0,1.1);   /* hochgeklappte Leiter */
+   for(let y=2.1;y<4.5;y+=.35)box(.5,.03,.03,fx,y,fz,ry,0,off+W/2-.72,0,1.1)}
+  if(!L.length)return;const m=new THREE.Mesh(mergeGeos(L),new THREE.MeshStandardMaterial({color:0x2b2d31,roughness:.6,metalness:.55}));m.castShadow=true;m.receiveShadow=true;city.sc.add(m);this.mesh=m;this.n=L.length}};
+{const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);try{FireEsc.build(this)}catch(x){console.warn('Feuertreppen',x)}}}
 /* ===== Hauptmenü wie GTA V: die drei Hauptfiguren als schräg gestellte Artwork-Paneele (aus dem Spiel gerendert, Comic-Kontrast, Figurenfarben) ===== */
 const Trio={done:false,
  css:`#trio{position:fixed;z-index:9;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));display:none;gap:12px;pointer-events:none}
