@@ -697,6 +697,7 @@ const WORLD_FRAG_MAIN='worldMat(vStyle,vWP,normalize(vWN),normalize(cameraPositi
 /* ---- Asphalt: Fahrbahnmarkierungen in Weltkoordinaten (gestochen scharf), Pfützen, Planar-Reflection ---- */
 const GLSL_GROUND=GLSL_REFL+`
 varying vec3 vWP;
+uniform sampler2D uLampT;
 vec3 bumpG(vec3 pos,vec3 nn,float h){vec3 dpx=dFdx(pos),dpy=dFdy(pos);float dhx=dFdx(h),dhy=dFdy(h);vec3 r1=cross(dpy,nn),r2=cross(nn,dpx);float det=dot(dpx,r1);vec3 g=sign(det)*(dhx*r1+dhy*r2);return normalize(abs(det)*nn-g);}
 float GH=0.;
 void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout float me){
@@ -755,6 +756,10 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  if(uSnowC>.01){float trk=0.;if(vroad)trk=max(trk,smoothstep(.5,.15,abs(abs(ax-3.)-.8)));if(hroad)trk=max(trk,smoothstep(.5,.15,abs(abs(az-3.)-.8)));
   vec3 snow=vec3(.82,.85,.9)*(.85+.15*fbm(q*2.));float cov=uSnowC*(1.-trk*.75);alb=mix(alb,snow,cov);ro=mix(ro,.9,cov);em*=1.-cov*.85;}
  em+=mark*clamp(mk,0.,1.)*.06*wear*(1.-uDay);
+ /* Natriumdampf-Lichtkegel der Straßenlaternen (wie Los Santos bei Nacht): Laternen-Ecken je Kreuzung aus uLampT */
+ if(uDay<.97){vec2 ic=floor(q/S_+.5),lq=q-ic*S_;vec4 lm=texture2D(uLampT,(ic+8.5)/16.);float pl=0.;
+  for(int k=0;k<4;k++){vec2 sg=vec2(k==1||k==3?1.:-1.,k>1?1.:-1.);float on=k==0?lm.r:k==1?lm.g:k==2?lm.b:lm.a;vec2 d=lq-sg*vec2(5.4,8.4);pl+=on*exp(-dot(d,d)/30.);}
+  em+=(min(alb,vec3(.3))+.04)*vec3(1.,.58,.26)*min(pl,1.1)*2.7*(1.-uDay)*(1.-uSnowC*.5);}
 }
 `;
 /* ---- Glas (Lobby-Front): Fresnel-Transparenz + Himmelsspiegelung ---- */
@@ -801,7 +806,7 @@ const M={};
 function initMaterials(){
  const U1={uTime:GU.uTime,tRefl:RF.tRefl,uReflM:RF.uReflM,uReflOn:RF.uReflOn};
  M.world=inject(Object.assign(new THREE.MeshStandardMaterial({color:0xffffff,roughness:.7,metalness:.1}),{extensions:{derivatives:true}}),'world',{uni:U1,vp:WORLD_VERT_PARS,vm:WORLD_VERT_MAIN,fp:GLSL_WORLD,fm:WORLD_FRAG_MAIN});
- M.ground=inject(Object.assign(new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5,metalness:.15}),{extensions:{derivatives:true}}),'ground',{uni:U1,
+ M.ground=inject(Object.assign(new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5,metalness:.15}),{extensions:{derivatives:true}}),'ground',{uni:Object.assign({uLampT:GU.uLampT||(GU.uLampT={value:new THREE.DataTexture(new Uint8Array(1024),16,16)})},U1),
   vp:'varying vec3 vWP;',vm:'vWP=(modelMatrix*vec4(transformed,1.)).xyz;',fp:GLSL_GROUND,
   fm:'groundMat(vWP,normalize(cameraPosition-vWP),diffuseColor.rgb,totalEmissiveRadiance,roughnessFactor,metalnessFactor);{float bf=1.-smoothstep(25.,80.,length(vViewPosition));if(bf>0.)normal=bumpG(-vViewPosition,normal,GH*bf);}'});
  M.glass=inject(new THREE.MeshStandardMaterial({color:0x78d8ff,roughness:.05,metalness:.3,transparent:true,opacity:.3,depthWrite:false}),'glass',{uni:{uTime:GU.uTime},
@@ -5583,6 +5588,10 @@ const Roofs={
   if(!L.length)return;const m=new THREE.Mesh(mergeGeos(L.map(g=>g.index?g.toNonIndexed():g)),new THREE.MeshStandardMaterial({color:0xaeb0b2,roughness:.8,metalness:.05}));
   m.castShadow=true;m.receiveShadow=true;city.sc.add(m);this.mesh=m;this.n=L.length}};
 {const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);try{Roofs.build(this)}catch(x){console.warn('Dächer',x)}}}
+/* Laternen-Ecken pro Kreuzung in eine 16×16-Textur (R:−x−z G:+x−z B:−x+z A:+x+z) → Lichtkegel im Asphalt-Shader */
+{const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);try{const T=GU.uLampT||(GU.uLampT={value:new THREE.DataTexture(new Uint8Array(1024),16,16)}),D=T.value.image.data;D.fill(0);
+ for(const p of this.lamps||[]){const ix=Math.round(p[0]/S),iz=Math.round(p[1]/S),dx=p[0]-ix*S,dz=p[1]-iz*S;if(Math.abs(Math.abs(dx)-6.5)>.6||Math.abs(Math.abs(dz)-8.4)>.6||Math.abs(ix)>7||Math.abs(iz)>7)continue;
+  D[((iz+8)*16+ix+8)*4+(dx>0?1:0)+(dz>0?2:0)]=255}T.value.needsUpdate=true}catch(x){console.warn('Laternen',x)}}}
 /* ===== Hauptmenü wie GTA V: die drei Hauptfiguren als schräg gestellte Artwork-Paneele (aus dem Spiel gerendert, Comic-Kontrast, Figurenfarben) ===== */
 const Trio={done:false,
  css:`#trio{position:fixed;z-index:9;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));display:none;gap:12px;pointer-events:none}
