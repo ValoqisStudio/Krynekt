@@ -1000,7 +1000,7 @@ class PostFX{
 const _p1=new THREE.Vector3(),_p2=new THREE.Vector3(),_p3=new THREE.Vector3();
 
 /* ===== Schild-Atlas: alle Neonschriften in EINER Textur, Pulsieren/Flackern im Shader ===== */
-const SIGNS=[['NEON','#19e6ff'],['HOTEL','#ff2d95'],['BAR','#ffd23c'],['CLUB 77','#b06cff'],['RAMEN','#ff6a3c'],['ARCADE','#3cff9a'],['CYBER','#19e6ff'],['VORTEX','#ff2d95'],
+const SIGNS=[['MOTEL','#19e6ff'],['HOTEL','#ff2d95'],['BAR','#ffd23c'],['CLUB 77','#b06cff'],['TACOS','#ff6a3c'],['ARCADE','#3cff9a'],['LIQUOR','#19e6ff'],['VORTEX','#ff2d95'],
  ['VALOQIS','#19e6ff'],['CASINO','#ff2d95'],['TANK','#3cff9a'],['24/7','#ffd23c'],['DÖNER','#ffb020'],['SPÄTI','#3cff9a'],['WAFFEN','#ff4a3c'],['MODE','#ff4fd8']];
 function signAtlas(){const c=cv(1024,384),g=c.getContext('2d');g.textAlign='center';g.textBaseline='middle';
  SIGNS.forEach(([t,col],i)=>{const x=(i%4)*256+128,y=((i/4)|0)*96+48;g.font='bold 44px system-ui,Segoe UI,Arial,sans-serif';g.shadowColor=col;g.shadowBlur=16;g.strokeStyle=col;g.lineWidth=3;g.fillStyle='#fff';g.strokeText(t,x,y);g.fillText(t,x,y)});
@@ -2316,17 +2316,17 @@ class SkyExtras{
 }
 
 /* ===== Stadt-Deko: animierte Dach-Werbetafeln (Shader), senkrechte Neonschilder, farbige Neon-Lichtflecken auf dem nassen Boden ===== */
-const ADS=[['NEO COLA','#ff2d55','#2a0010','Durst auf Zukunft'],['VX MOTORS','#19e6ff','#001a24','Der neue VX-9 Hover'],['SYNTH RAMEN','#ffb020','#2a1200','24/7 · Ebene -3'],['HYPERLINK 6G','#a06bff','#120028','Schneller als Gedanken'],
- ['VALOQIS','#19e6ff','#04101e','STUDIO · PRÄSENTIERT'],['NEURO-CHIP','#3cff9a','#00200f','Upgrade dein Gehirn'],['VORTEXIA FM','#ff4fd8','#200018','101.7 · Neo-Beats'],['ORBITAL BANK','#ffe066','#1e1800','Dein Geld im All']];
+const ADS=[['VORTEX COLA','#ff3b3b','#5a0a0a','Schmeckt nach Sonne'],['VX MOTORS','#ffd23c','#1a2a44','Das neue VX-9 Coupé'],['DÖNER PALAST','#ffb020','#4a1c00','Bester Döner der Stadt'],['LUCKY 77','#3cff9a','#0a3018','Casino · Heute ist dein Tag'],
+ ['VALOQIS','#ffffff','#20324a','STUDIO · PRÄSENTIERT'],['MIRADOR HEIGHTS','#ffe8b0','#3a2a14','Wohnen ab $2 Mio.'],['VORTEXIA FM','#ff6ad0','#3a0a30','101.7 · West Coast Hits'],['1ST VORTEX BANK','#9fd0ff','#0a2238','Wir lieben dein Geld']];
 function adAtlas(){const c=cv(1024,1024),g=c.getContext('2d');
  ADS.forEach(([t,col,bg,sub],i)=>{const x=(i%2)*512,y=((i/2)|0)*256;const gr=g.createLinearGradient(x,y,x+512,y+256);gr.addColorStop(0,bg);gr.addColorStop(1,'#000');g.fillStyle=gr;g.fillRect(x,y,512,256);
   g.save();g.beginPath();g.rect(x,y,512,256);g.clip();g.globalAlpha=.35;g.strokeStyle=col;g.lineWidth=2;for(let k=0;k<9;k++){g.beginPath();g.arc(x+430,y+128,20+k*22,0,TAU);g.stroke()}
-  g.globalAlpha=1;g.fillStyle=col;g.fillRect(x,y+232,512,6);g.shadowColor=col;g.shadowBlur=24;g.font='900 76px system-ui,Segoe UI,Arial';g.textBaseline='middle';g.fillStyle='#fff';g.fillText(t,x+28,y+105);
+  g.globalAlpha=1;g.fillStyle=col;g.fillRect(x,y+232,512,6);g.shadowColor=col;g.shadowBlur=24;let fz=76;g.font='900 76px system-ui,Segoe UI,Arial';while(g.measureText(t).width>440&&fz>36){fz-=4;g.font='900 '+fz+'px system-ui,Segoe UI,Arial'}g.textBaseline='middle';g.fillStyle='#fff';g.fillText(t,x+28,y+105);
   g.shadowBlur=0;g.font='600 30px system-ui,Segoe UI,Arial';g.fillStyle=col;g.fillText(sub,x+30,y+178);g.restore()});
  const tx=new THREE.CanvasTexture(c);tx.anisotropy=4;return tx}
-function vAtlas(){const W=['ネオン','ラーメン','ホテル','カジノ','バー','VX','クラブ','東京'],cols=['#ff2d95','#19e6ff','#ffd23c','#3cff9a','#b06cff','#ff6a3c','#19e6ff','#ff2d95'],c=cv(512,1024),g=c.getContext('2d');
+function vAtlas(){const W=['HOTEL','MOTEL','BAR','DINER','LIQUOR','TACOS','PAWN','OPEN'],cols=['#ff2d95','#19e6ff','#ffd23c','#3cff9a','#b06cff','#ff6a3c','#19e6ff','#ff2d95'],c=cv(512,1024),g=c.getContext('2d');
  W.forEach((t,i)=>{const x=i*64+32;g.fillStyle='rgba(10,8,20,.92)';g.fillRect(i*64+4,4,56,1016);g.strokeStyle=cols[i];g.lineWidth=3;g.shadowColor=cols[i];g.shadowBlur=10;g.strokeRect(i*64+7,7,50,1010);
-  g.font='900 50px system-ui,"Noto Sans JP",sans-serif';g.textAlign='center';g.fillStyle='#fff';const ch=[...t];ch.forEach((k,j)=>g.fillText(k,x,90+j*(900/Math.max(ch.length,3))))});
+  g.font='900 54px Impact,"Arial Black",system-ui,sans-serif';g.textAlign='center';g.fillStyle='#fff';const ch=[...t];ch.forEach((k,j)=>g.fillText(k,x,90+j*(900/Math.max(ch.length,3))))});
  return new THREE.CanvasTexture(c)}
 class Decor{
  constructor(e){const sc=e.scene,city=e.city;this.e=e;
