@@ -1094,7 +1094,8 @@ class CityGenerator{
     put(pole,l,lx,.3,lz);put(arm,l,lx,7.3,lz,ry);const hx=lx+a*1.9;put(hd,l,hx,7.18,lz);put(hdc,l,hx,7.2,lz);put(pool,l,hx,.36,lz);l++;this.lamps.push([hx,lz])});
    [[16.5,6],[16.5,-6],[-16.5,6],[-16.5,-6],[6,16.5],[-6,16.5],[6,-16.5],[-6,-16.5]].forEach(([a,b])=>{const px=x+a,pz=z+b,s=rand(.85,1.2);
     if(Math.abs(Math.sin(px*12.9898+pz*78.233)*43758.5453)%1<.42){put(tk,q2,px,.3,pz,rand(0,TAU),0,s);putK(q2,px,.3+5.6*s,pz,s);kr.setColorAt(q2,TK.tint(kcol));q2++;return}
-    put(tr,p,px,.3,pz,0,0,s);put(cr,p,px,.3+7*s,pz,0,0,s);for(let f=0;f<FR;f++){const dd=f>=FR-2;put(fr,p*FR+f,px,.3+(dd?6.85:6.95)*s,pz,f*TAU/FR+p*.7+rand(-.2,.2)+(dd?.3:0),dd?rand(.75,1.05):-.25+(f%3)*.22+rand(-.1,.1),s*(dd?.85:rand(.92,1.08)));fr.setColorAt(p*FR+f,dd?kcol.setRGB(.62,.46,.26):kcol.setRGB(1,1,1))}p++})});
+    const tall=Math.abs(Math.sin(px*3.17+pz*9.71)*24634.63)%1<.55,ty=tall?rand(2.1,2.9):1;dm.position.set(px,.3,pz);dm.rotation.set(rand(-.03,.03),0,rand(-.03,.03));dm.scale.set(s*(tall?.72:1),s*ty,s*(tall?.72:1));dm.updateMatrix();tr.setMatrixAt(p,dm.matrix);dm.scale.setScalar(1);
+    put(cr,p,px,.3+7*s*ty,pz,0,0,s);for(let f=0;f<FR;f++){const dd=f>=FR-2;put(fr,p*FR+f,px,.3+(dd?6.85:6.95)*s+7*s*(ty-1),pz,f*TAU/FR+p*.7+rand(-.2,.2)+(dd?.3:0),dd?rand(.75,1.05):-.25+(f%3)*.22+rand(-.1,.1),s*(dd?.85:rand(.92,1.08)));fr.setColorAt(p*FR+f,dd?kcol.setRGB(.62,.46,.26):kcol.setRGB(1,1,1))}p++})});
   /* Seepark: Laternen an der Promenade + Bäume */
   PARK.lamps.forEach(([lx,lz,a])=>{const ry=a>0?0:Math.PI;put(pole,l,lx,.3,lz);put(arm,l,lx,7.3,lz,ry);const hx=lx+a*1.9;put(hd,l,hx,7.18,lz);put(hdc,l,hx,7.2,lz);put(pool,l,hx,.36,lz);l++;this.lamps.push([hx,lz])});
   PARK.trees.forEach(([px,pz,s])=>{put(tk,q2,px,.3,pz,rand(0,TAU),0,s);putK(q2,px,.3+5.6*s,pz,s);kr.setColorAt(q2,TK.tint(kcol));q2++});
