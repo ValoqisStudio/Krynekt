@@ -4804,7 +4804,7 @@ function hillRing(R,hb,amp,seed,haze){const N=360,pos=[],idx=[],hv=[],rnd=_trnd(
   vertexShader:'attribute float aH;varying float vH;varying vec3 vP;void main(){vH=aH;vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
   fragmentShader:GLSL_LIB+'uniform float uHz;varying float vH;varying vec3 vP;void main(){vec3 d=normalize(vec3(vP.x,max(vP.y,0.)*.25+8.,vP.z));vec3 sky=skyEnv(d);'+
    'float n=vn(vP.xz*.02+vP.y*.03)*.6+vn(vP.xz*.07)*.4;vec3 day=mix(vec3(.15,.2,.14),vec3(.3,.29,.22),n)*(.7+.5*vH);vec3 hill=mix(sky*.18,day,uDay);'+
-   'float hz=clamp(uHz+(1.-vH)*.25,0.,1.);vec3 c=mix(hill,sky*mix(.7,.95,uDay),hz);gl_FragColor=vec4(c,1.);}'});
+   'float hz=clamp(uHz+(1.-vH)*.25+.2*uDay,0.,.94);vec3 hzC=mix(sky,vec3(.62,.72,.84)*(.35+.65*uDay)+sky*.15,.55*uDay);vec3 c=mix(hill,hzC*mix(.7,.92,uDay),hz);gl_FragColor=vec4(c,1.);}'});
  const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=-.5;return mesh}
 {const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);
   try{if(this.outer){this.outer.material=outerGroundMat();this.outer.receiveShadow=true}
