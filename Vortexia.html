@@ -5528,6 +5528,11 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* Qualität „Niedrig“ (ohne Nachbearbeitung): GTA-Farblook als günstiger CSS-Filter + warmer Dunst statt blauem Nebel */
+{const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);if(!this.post||(this.frame&7))return;const off=!this.post.on,d=GU.uDay.value;
+  const f=off?`saturate(${(1.12+.16*d).toFixed(2)}) contrast(${(1.04+.07*d).toFixed(2)}) sepia(${(.12*d).toFixed(2)}) brightness(${(1.06-.03*d).toFixed(2)})`:'';
+  const g=this.cvs.classList.contains('dead')?'':f;if(this._gf!==g){this._gf=g;this.cvs.style.filter=g}
+  if(off&&this.scene.fog&&!this.zone){const c=this.scene.fog.color;c.setRGB(lerp(.09,.9,d),lerp(.07,.84,d),lerp(.065,.72,d))}}}
 /* ===== Polizei wie in GTA V: Ab einem Stern rücken Streifenwagen an (pro Stern einer, höchstens vier), mit Blaulicht (rot/blau) und Sirene.
    Sie fahren dir hinterher; erwischen sie dich zu Fuß und du bleibst stehen, wirst du verhaftet (−$100, Sterne weg).
    Ohne Sterne drehen sie ab und verschwinden. Ein Streifenwagen kann – wie in GTA – auch geklaut werden. ===== */
