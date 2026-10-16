@@ -5525,6 +5525,10 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* Ausgeschaltet wie in GTA V: Zeitlupe, weißer Blitz, Kamera zieht nach oben weg */
+{const w0=Engine.prototype.wasted;Engine.prototype.wasted=function(src){const P=this.player;if(P.dead)return w0.call(this,src);w0.call(this,src);
+  try{World.smT=Math.max(World.smT||0,2.2)}catch(x){}const f=$('#swf');if(f){f.style.transition='opacity .08s';f.style.opacity=.9;setTimeout(()=>{f.style.transition='opacity 1.2s';f.style.opacity=0},90)}
+  const cr=this.camR,d0=cr.dist,p0=cr.pitch;let t=0;const iv=setInterval(()=>{t+=.05;cr.dist=lerp(d0,11,Math.min(1,t/2));cr.pitch=lerp(p0,.75,Math.min(1,t/2));if(!P.dead||t>3.6){clearInterval(iv);cr.dist=d0;cr.pitch=p0}},50)}}
 /* Kein Sci-Fi am Himmel: Riesen-Hologramm nur, wenn der Admin eine Durchsage daraufschreibt; keine Fluggleiter (wie in Los Santos) */
 {const su=SkyExtras.prototype.update,sh=SkyExtras.prototype.setHolo;
  SkyExtras.prototype.setHolo=function(t,sub){this.holoOn=!!t&&t!=='VORTEXIA';return sh.call(this,t,sub)};
