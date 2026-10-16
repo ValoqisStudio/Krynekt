@@ -66,16 +66,16 @@ body{font-family:var(--ui)}
 .scr{position:fixed;inset:0;z-index:20;display:none;overflow:hidden;background:#000;color:#fff}
 .scr.on{display:block}
 /* Ladebildschirm */
-#ld{background:linear-gradient(#24185a,#9a3f86 38%,#ff7f5a 62%,#ffc070 80%,#ffd99a)}
+#ld{background:linear-gradient(#16345e,#4f6f96 36%,#e0905a 60%,#ffc070 80%,#ffe0a8)}
 #ld canvas{position:absolute;inset:0;width:100%;height:100%}
 .ld-in{position:absolute;left:max(24px,env(safe-area-inset-left));right:max(24px,env(safe-area-inset-right));bottom:calc(28px + env(safe-area-inset-bottom));display:grid;gap:10px}
 .ld-brand{font:400 clamp(54px,12vw,150px)/.86 var(--disp);letter-spacing:.02em;text-transform:uppercase;background:linear-gradient(180deg,#fff 0,#bff6ff 45%,#19e6ff 70%,#ff2d95 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 30px #19e6ff55)}
 .ld-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.ld-bar{height:4px;background:#ffffff1f;border-radius:2px;overflow:hidden}.ld-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#19e6ff,#ff2d95);transition:width .3s}
+.ld-bar{height:4px;background:#ffffff1f;border-radius:2px;overflow:hidden}.ld-bar i{display:block;height:100%;width:0;background:#72c26a;transition:width .3s}
 #boot{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
 .ld-tip{margin:0;max-width:62ch;font-size:14px;opacity:.85}.ld-tip b{color:var(--gold);letter-spacing:.1em;margin-right:8px}
 #tap{justify-self:start;font:600 15px var(--ui);letter-spacing:.24em;text-transform:uppercase;background:#ffffff14;border:1px solid #ffffff55;padding:14px 26px;border-radius:2px;animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{50%{background:#19e6ff33;border-color:#19e6ff}}
+@keyframes pulse{50%{background:#ffffff26;border-color:#fff}}
 /* Intro */
 #intro{background:transparent;cursor:pointer}
 #intro .blk{position:absolute;inset:0;background:#000;transition:opacity 1.2s}
@@ -926,7 +926,7 @@ void main(){
  {float dz=texture2D(tDepth,uv).x;float dd=linD(dz);float hz=(1.-exp(-max(dd-12.,0.)*.0042))*uDay*.62*step(dz,.99999);
   col=mix(col,vec3(1.02,.94,.8)*1.15,hz);}
  col=tonemap(col);
- vec3 nC=col;{float l=dot(nC,vec3(.299,.587,.114));nC=mix(vec3(l),nC,1.18);nC=mix(nC*vec3(.9,1.02,1.12)+vec3(0.,.004,.012),nC*vec3(1.06,.98,.94),smoothstep(.15,.75,l));}
+ vec3 nC=col;{float l=dot(nC,vec3(.299,.587,.114));nC=mix(vec3(l),nC,1.18);nC=mix(nC*vec3(.94,1.,1.1)+vec3(.004,.006,.014),nC*vec3(1.12,.98,.86),smoothstep(.1,.7,l))*1.12;}
  vec3 dC=col;{float l=dot(dC,vec3(.2126,.7152,.0722));dC=mix(vec3(l),dC,1.32);dC*=mix(vec3(.9,.99,1.09),vec3(1.09,1.,.85),smoothstep(.05,.72,l));
   dC=mix(dC,dC*dC*(3.-2.*dC),.34);dC=dC*.965+vec3(.02,.013,0.);}
  col=clamp(mix(nC,dC,uDay),0.,1.);col=pow(col,vec3(.95));
@@ -3098,15 +3098,15 @@ const Intro={
   const palm=(x,y,s,f)=>{g.save();g.translate(x,y);g.scale(s*f,s);g.lineCap='round';g.lineWidth=6;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(6,-60,2,-120);g.stroke();
    [-70,-35,0,35,70,110,-110].forEach(a=>{const r=a*Math.PI/180;g.beginPath();g.moveTo(2,-120);g.quadraticCurveTo(Math.cos(r)*40,-134+Math.sin(r)*14,Math.cos(r)*72,-106+Math.abs(Math.sin(r))*20);g.stroke()});g.restore()};
   const draw=t=>{raf=requestAnimationFrame(draw);const W=c.width,H=c.height,k=W/1600;
-   const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#24185a');sky.addColorStop(.38,'#9a3f86');sky.addColorStop(.62,'#ff7f5a');sky.addColorStop(.8,'#ffc070');sky.addColorStop(1,'#ffd99a');g.fillStyle=sky;g.fillRect(0,0,W,H);
+   const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#16345e');sky.addColorStop(.36,'#4f6f96');sky.addColorStop(.6,'#e0905a');sky.addColorStop(.8,'#ffc070');sky.addColorStop(1,'#ffe0a8');g.fillStyle=sky;g.fillRect(0,0,W,H);
    const sx=W*.66,sy=H*.6,sr=Math.min(W,H)*.12,sg=g.createRadialGradient(sx,sy,0,sx,sy,sr*4);sg.addColorStop(0,'rgba(255,252,225,1)');sg.addColorStop(.22,'rgba(255,232,160,.9)');sg.addColorStop(.55,'rgba(255,170,100,.3)');sg.addColorStop(1,'rgba(255,140,90,0)');
    g.fillStyle=sg;g.fillRect(0,0,W,H);g.fillStyle='#fff7da';g.beginPath();g.arc(sx,sy,sr,0,TAU);g.fill();
-   g.fillStyle='rgba(255,210,170,.16)';for(let i=0;i<5;i++){const y=H*(.2+i*.07),o=(t*.004*(i+1))%W;g.fillRect(-o,y,W*2,H*.012*(1+i%2))}
-   birds.forEach(b=>{const x=((b[0]*W+t*.03*b[2]*k)%(W*1.2))-W*.1,y=b[1]*H+Math.sin(t*.002+b[3])*8*k,s=7*k*b[2],f=Math.sin(t*.012*b[2]+b[3])*.6;g.strokeStyle='rgba(40,16,50,.75)';g.lineWidth=2*k;g.beginPath();g.moveTo(x-s,y-s*f);g.quadraticCurveTo(x-s*.4,y-s*.2,x,y);g.quadraticCurveTo(x+s*.4,y-s*.2,x+s,y-s*f);g.stroke()});
-   layers.slice().reverse().forEach((L,li)=>{const l=2-li,sp=(l+1)*5,off=(t*.001*sp)%1200,col=['#8a4a86','#55285f','#1e0d2a'][l];
+   g.fillStyle='rgba(255,226,190,.07)';for(let i=0;i<5;i++){const y=H*(.2+i*.07),o=(t*.004*(i+1))%W;g.fillRect(-o,y,W*2,H*.012*(1+i%2))}
+   birds.forEach(b=>{const x=((b[0]*W+t*.03*b[2]*k)%(W*1.2))-W*.1,y=b[1]*H+Math.sin(t*.002+b[3])*8*k,s=7*k*b[2],f=Math.sin(t*.012*b[2]+b[3])*.6;g.strokeStyle='rgba(20,18,24,.75)';g.lineWidth=2*k;g.beginPath();g.moveTo(x-s,y-s*f);g.quadraticCurveTo(x-s*.4,y-s*.2,x,y);g.quadraticCurveTo(x+s*.4,y-s*.2,x+s,y-s*f);g.stroke()});
+   layers.slice().reverse().forEach((L,li)=>{const l=2-li,sp=(l+1)*5,off=(t*.001*sp)%1200,col=['#6d6a78','#3a3540','#121016'][l];
     L.forEach(([x,w,h,r])=>{const X=((x-off)%2400+2400)%2400*k-W*.1,Y=H*(1-h),Wd=w*k;g.fillStyle=col;g.fillRect(X,Y,Wd,H);
      if(l==2){g.fillStyle='#ffc77a';g.globalAlpha=.35;for(let yy=Y+8;yy<H-20;yy+=14)for(let xx=X+5;xx<X+Wd-6;xx+=10)if(((xx*7+yy*3+r*999)|0)%7==0)g.fillRect(xx,yy,4,6);g.globalAlpha=1}})});
-   g.strokeStyle='#14081c';const po=(t*.001*15)%1200;palms.forEach(([x,s,f])=>palm(((x-po)%2400+2400)%2400*k-W*.1,H*1.01,s*k*1.6,f))};
+   g.strokeStyle='#0c0b0e';const po=(t*.001*15)%1200;palms.forEach(([x,s,f])=>palm(((x-po)%2400+2400)%2400*k-W*.1,H*1.01,s*k*1.6,f))};
   raf=requestAnimationFrame(draw);this.stopArt=()=>cancelAnimationFrame(raf)},
  ready(E){this.E=E;this.progress(1);$('#boot').textContent='Bereit · '+E.col.describe();const t=$('#tap');t.hidden=false;t.focus({preventScroll:true});
   const go=()=>{removeEventListener('keydown',kd);this.start()},kd=ev=>{if(ev.key=='Enter'||ev.key==' ')go()};t.onclick=go;addEventListener('keydown',kd)},
@@ -5408,6 +5408,7 @@ const GTAUI={
 #map{width:250px!important;height:178px!important;left:calc(22px + var(--sal))!important;bottom:calc(20px + var(--sab))!important;border-radius:3px;filter:drop-shadow(0 2px 6px #000a)!important}
 body.touch #map{width:178px!important;height:128px!important;top:calc(10px + var(--sat))!important;bottom:auto!important;left:calc(10px + var(--sal))!important}
 #hpw,#zone{display:none!important}
+#top button{background:#000000a8!important;border:0!important;border-radius:2px!important;font:600 13px var(--ui)!important;letter-spacing:.04em;box-shadow:none!important}#top button:hover{background:#000d!important}
 #clk{left:auto!important;right:calc(24px + var(--sar))!important;bottom:auto!important;top:calc(150px + var(--sat))!important;font:600 13px var(--ui)!important;opacity:.85}
 #cash{top:calc(104px + var(--sat))!important}
 #cashv{font:400 34px/1 var(--disp)!important;letter-spacing:.02em;color:#72c26a!important;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 3px 6px #000c!important}
@@ -5502,6 +5503,27 @@ const Switch={on:false,sel:0,
    setTimeout(()=>Voice.player('pick',3,true),500)},380)}};
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);if(Switch.on&&!this.playing)Switch.close()}}
 Switch.init();
+/* ===== Fahndungslevel wie in GTA V: Autodiebstahl, Angriffe und Schüsse auf Passanten bringen Sterne (bis 5).
+   Ohne neue Straftaten blinken die Sterne und verschwinden nach und nach (Untertauchen). Bei „Ausgeschaltet“ ist alles vergessen. ===== */
+const Wanted={heat:0,stars:0,calm:0,
+ init(){const st=document.createElement('style');st.textContent=`#wnt{position:fixed;z-index:5;right:calc(22px + var(--sar));top:calc(172px + var(--sat));display:flex;gap:3px;pointer-events:none;opacity:0;transition:opacity .3s}
+#wnt.on{opacity:1}#wnt i{width:24px;height:24px;background:#fff;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);filter:drop-shadow(0 0 1px #000)}
+#wnt i.off{background:#ffffff38}#wnt.flash i:not(.off){animation:wfl .5s steps(1) infinite}@keyframes wfl{50%{background:#ffffff40}}
+body.touch #wnt{top:calc(150px + var(--sat))}`;document.head.appendChild(st);
+  const d=document.createElement('div');d.id='wnt';d.innerHTML='<i></i><i></i><i></i><i></i><i></i>';document.body.appendChild(d);this.el=d},
+ crime(pts){this.heat=Math.min(30,this.heat+pts);this.calm=0;this.upd()},
+ lvl(h){return h<=0?0:h<3?1:h<6?2:h<11?3:h<18?4:5},
+ upd(){const s=this.lvl(this.heat);if(s>this.stars&&VX.sfx&&VX.sfx.click)VX.sfx.click();this.stars=s;
+  this.el.querySelectorAll('i').forEach((e,k)=>e.classList.toggle('off',k>=s));this.el.classList.toggle('on',s>0&&VX.playing)},
+ update(dt){const P=VX.player;if(!P)return;if(P.dead){if(this.heat){this.heat=0;this.upd()}return}
+  if(this.heat>0){this.calm+=dt;const evade=this.calm>12;this.el.classList.toggle('flash',evade);
+   if(evade){const h=this.heat;this.heat=Math.max(0,this.heat-dt*(.35+this.stars*.08));if(this.lvl(h)!==this.lvl(this.heat))this.upd()}}
+  this.el.classList.toggle('on',this.stars>0&&VX.playing)}};
+{const nu=NPC.prototype.update;NPC.prototype.update=function(dt){const s0=this.state,d0=this.dead;nu.call(this,dt);
+  if(this.dead&&!d0)Wanted.crime(4);else if(this.state==='hit'&&s0!=='hit')Wanted.crime(1.5);else if(this.state==='flee'&&s0!=='flee'&&this.e.player.armed)Wanted.crime(.4)}}
+{const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
+{const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
+Wanted.init();
 /* Kein Sci-Fi am Himmel: Riesen-Hologramm nur, wenn der Admin eine Durchsage daraufschreibt; keine Fluggleiter (wie in Los Santos) */
 {const su=SkyExtras.prototype.update,sh=SkyExtras.prototype.setHolo;
  SkyExtras.prototype.setHolo=function(t,sub){this.holoOn=!!t&&t!=='VORTEXIA';return sh.call(this,t,sub)};
