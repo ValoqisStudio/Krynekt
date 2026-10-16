@@ -623,6 +623,19 @@ void worldMat(float st,vec3 p,vec3 n,vec3 V,vec3 tint,float seed,inout vec3 alb,
   em=glass*(emW*.95+refl*gt*(.42+.58*F)*(1.-.7*lit*(1.-uDay)));
   if(kind<.5){float spd=(1.-win);em+=spd*refl*gt*(.1+.55*F)*.8;alb=mix(alb,alb*.5,spd*.5);}
   alb*=nf;
+  /* Geschlossene Läden wie in Los Santos: Rollladen aus Wellblech mit Graffiti-Tags (nur Erdgeschoss, Putz/Backstein) */
+  if(gnd>.5&&kind>.5&&win>.5&&lod<.9&&h21(id+9.1)<.2){vec2 q=wf*ws;float rib=.72+.28*smoothstep(.25,.5,abs(fract(q.y*8.)-.5));
+   vec3 sh=vec3(.4,.41,.42)*rib*(.78+.32*vn(q*2.6+seed*9.))*(1.-.25*smoothstep(.6,.9,vn(q*.9+seed)));
+   float gs=h21(id+4.4);vec2 gq=(q-vec2(.1,.25))/max(ws-vec2(.2,.6),vec2(.1));float inG=step(0.,gq.x)*step(gq.x,1.)*step(0.,gq.y)*step(gq.y,1.)*step(.25,gs);
+   /* Bubble-Letters: 3–6 Buchstaben, jeder aus 3 dicken Strichen (Kapseln), schräg gestellt, mit dunkler Kontur + Glanzpunkt */
+   float nL=3.+floor(gs*4.),lx=gq.x*nL,li=floor(lx);vec2 lp=vec2(fract(lx)-.5,gq.y-.5);lp.x+=lp.y*.28;lp.y+=.06*sin(li*2.1+gs*7.);float dL=9.;
+   for(int k=0;k<3;k++){float hk=h21(vec2(li+float(k)*7.3,gs*17.)),hk2=h21(vec2(li*1.7+float(k)*3.1,gs*5.+2.));
+    vec2 A=vec2(floor(hk*3.)-1.,floor(fract(hk*7.)*3.)-1.)*vec2(.26,.3),B=vec2(floor(hk2*3.)-1.,floor(fract(hk2*7.)*3.)-1.)*vec2(.26,.3);if(length(A-B)<.1)B=-A;
+    vec2 pa=lp-A,ba=B-A;float t=clamp(dot(pa,ba)/max(dot(ba,ba),1e-4),0.,1.);dL=min(dL,length(pa-ba*t));}
+   float fill=step(dL,.13)*inG,outl=step(dL,.19)*inG*(1.-fill);
+   vec3 gc=hue(gs*3.7)*.85+.06,gc2=hue(fract(gs*3.7+.5))*.8+.1;sh=mix(sh,vec3(.03),outl);sh=mix(sh,mix(gc,gc2,smoothstep(.2,.8,gq.y)),fill);
+   sh=mix(sh,vec3(.95),step(dL,.04)*fill*step(.55,gs)*.7);
+   alb=sh*nf;em=vec3(0.);ro=.55;me=.35;glass=0.;}
   /* Shop-Schilderband über dem Erdgeschoss */
   float sid=h21(vec2(floor(cx*.5)+.5,seed*3.)),sgn=gnd*inC*step(.8,fy)*step(fy,.95)*step(.3,sid);vec3 sc=hue(fract(sid*7.3))*1.1+.25;
   vec2 sq=vec2(fract(uu*.5)*2.,(fy-.8)/.15);float txt=step(.5,vn(vec2(floor(sq.x*14.),floor(sq.y*5.))*1.7+sid*40.))*step(.15,sq.x)*step(sq.x,1.85)*step(.25,sq.y)*step(sq.y,.75);
