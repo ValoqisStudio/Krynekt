@@ -617,10 +617,10 @@ void worldMat(float st,vec3 p,vec3 n,vec3 V,vec3 tint,float seed,inout vec3 alb,
   vec3 emW=mix(rm,lc*(.4+.2*occ),lod)*lit*mix(1.,.16,uDay);
   /* Spiegelung: Himmel oben, gegenüberliegende Häuser unten */
   vec3 Rv=reflect(-V,n);float F=pow(1.-max(dot(n,V),0.),4.);vec3 refl=skyEnv(Rv);
-  float bR=1.-smoothstep(.06,.5,Rv.y);refl=mix(refl,refl*(.16+.34*vn(vec2(atan(Rv.z,Rv.x)*26.+seed*9.,Rv.y*18.))),bR*.85);
+  float bR=1.-smoothstep(.06,.5,Rv.y);refl=mix(refl,refl*(.16+.34*vn(vec2(atan(Rv.z,Rv.x)*26.+seed*9.,Rv.y*18.))),bR*.42);
   vec3 gt=kind<.5?(pv<.33?vec3(.55,.8,.85):pv<.66?vec3(.75,.78,.85):vec3(.85,.68,.5)):vec3(.85,.88,.92);
-  alb=mix(wall,fc,frm);alb=mix(alb,vec3(.006,.008,.012),glass);ro=mix(kind<.5?.35:.8,.04,glass);me=mix(kind<.5?.6:.04,.9,glass);
-  em=glass*(emW*.95+refl*gt*(.14+.86*F)*(1.-.7*lit*(1.-uDay)));
+  alb=mix(wall,fc,frm);alb=mix(alb,vec3(.025,.04,.05),glass);ro=mix(kind<.5?.35:.8,.04,glass);me=mix(kind<.5?.6:.04,.9,glass);
+  em=glass*(emW*.95+refl*gt*(.42+.58*F)*(1.-.7*lit*(1.-uDay)));
   if(kind<.5){float spd=(1.-win);em+=spd*refl*gt*(.1+.55*F)*.8;alb=mix(alb,alb*.5,spd*.5);}
   alb*=nf;
   /* Shop-Schilderband über dem Erdgeschoss */
