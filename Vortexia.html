@@ -672,6 +672,10 @@ void worldMat(float st,vec3 p,vec3 n,vec3 V,vec3 tint,float seed,inout vec3 alb,
  }else if(st<10.5){ /* 10: Gehweg-Platten, nass */
   vec2 f=fract(p.xz/1.6);float gr=smoothstep(0.,.025,min(min(f.x,1.-f.x),min(f.y,1.-f.y)));
   alb=tint*(.8+.4*vn(p.xz*2.))*mix(.55,1.,gr);ro=mix(.4,.8,gr*vn(p.xz*.5));me=.05;BH=gr*.012+vn(p.xz*6.)*.004;
+  /* Los-Santos-Gehweg: Platten unterschiedlich hell, Schmutzflecken, Kaugummi-Punkte, dunkle Fugen (nur Oberseite) */
+  if(n.y>.5){vec2 ti=floor(p.xz/1.6);alb*=.9+.18*h21(ti);alb*=1.-.22*smoothstep(.5,.8,fbm(p.xz*.35+ti*.01));
+   vec2 gq=p.xz*2.3,gi=floor(gq);float gm=step(.93,h21(gi+7.))*smoothstep(.09,.05,length(fract(gq)-.5-(vec2(h21(gi+1.7),h21(gi+3.1))-.5)*.6));alb=mix(alb,alb*.45,gm);
+   alb*=mix(.82,1.,gr);}
   if(n.y>.5){em+=floorRefl(p,V,.5)*(.04+.5*pow(1.-max(V.y,0.),4.))*.35*gr*uWet*(1.-uSnowC);alb=mix(alb,vec3(.8,.83,.88)*(.9+.1*vn(p.xz*3.)),uSnowC*.92);ro=mix(ro,.85,uSnowC);}
  }else if(st<11.5){ /* 11: Blattwerk / Pflanzen */
   alb=tint*(.7+.5*vn(p.xz*7.+p.y*4.));ro=.7;me=0.;em+=tint*.05;
