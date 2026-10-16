@@ -5509,7 +5509,7 @@ const Wanted={heat:0,stars:0,calm:0,
  init(){const st=document.createElement('style');st.textContent=`#wnt{position:fixed;z-index:5;right:calc(22px + var(--sar));top:calc(172px + var(--sat));display:flex;gap:3px;pointer-events:none;opacity:0;transition:opacity .3s}
 #wnt.on{opacity:1}#wnt i{width:24px;height:24px;background:#fff;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);filter:drop-shadow(0 0 1px #000)}
 #wnt i.off{background:#ffffff38}#wnt.flash i:not(.off){animation:wfl .5s steps(1) infinite}@keyframes wfl{50%{background:#ffffff40}}
-body.touch #wnt{top:calc(150px + var(--sat))}`;document.head.appendChild(st);
+body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px);height:clamp(18px,2.4vw,24px)}`;document.head.appendChild(st);
   const d=document.createElement('div');d.id='wnt';d.innerHTML='<i></i><i></i><i></i><i></i><i></i>';document.body.appendChild(d);this.el=d},
  crime(pts){this.heat=Math.min(30,this.heat+pts);this.calm=0;this.upd()},
  lvl(h){return h<=0?0:h<3?1:h<6?2:h<11?3:h<18?4:5},
