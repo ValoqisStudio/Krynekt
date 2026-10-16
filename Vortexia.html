@@ -1472,12 +1472,13 @@ class NPC{
   switch(this.state){
    case 'walk':vt=this.vw;this.follow(dt,2.2);if(threat){this.state='alert';this.st=rand(.5,1.1)}else if(this.st<=0){this.state='idle';this.st=rand(2,6);this.act=rand(0,1)<.5?'phone':'look'}break;
    case 'idle':case 'stand':phone=this.act=='phone'||this.act0=='phone'?1:0;face=this.kind!='walk';if(threat){this.state='alert';this.st=rand(.4,.9)}else if(this.kind=='walk'&&this.st<=0){this.state='walk';this.st=rand(8,22);this.s=ringNearest(this.x-this.cx,this.z-this.cz,this.hh)}break;
+   case 'cop':vt=this.copV||0;if(this.copH!=null)this.h+=wrapPI(this.copH-this.h)*Math.min(1,dt*9);break;
    case 'dance':dance=1;if(threat&&dp<10){this.state='alert';this.st=rand(.4,.8)}break;
    case 'phone':phone=1;face=true;if(threat){this.state='alert';this.st=rand(.4,.8)}break;
    case 'alert':face=true;if(this.st<=0){if(dp<9&&rand(0,1)<.5){this.state='cower';this.st=rand(3,5)}else this.flee(P.x,P.z)}break;
    case 'cower':cower=1;if(this.st<=0){if(this.kind=='walk')this.flee(P.x,P.z);else{this.state=this.act0;this.calm=10}}break;
    case 'flee':vt=5.4;this.follow(dt,3);if(this.st<=0){this.state='walk';this.calm=12;this.st=rand(6,14)}break;
-   case 'hit':if(this.st<=0){if(this.dead){this.state='down';this.st=rand(6,9)}else this.flee(P.x,P.z)}break;
+   case 'hit':if(this.st<=0){if(this.dead){this.state='down';this.st=rand(6,9)}else if(this.cop)this.state='cop';else this.flee(P.x,P.z)}break;
    case 'down':this.down=Math.min(1,this.down+dt*4.5);if(this.st<=0){this.state='up';this.st=1.1}break;
    case 'up':this.down=Math.max(0,this.down-dt*1.0);if(this.st<=0){this.down=0;this.hp=3;this.dead=false;if(this.kind=='walk')this.flee(P.x,P.z);else this.state=this.act0}break}
   if(face&&dp<10&&this.state!='down')this.h+=wrapPI(Math.atan2(dxp,dzp)-this.h)*Math.min(1,dt*4);
@@ -5585,6 +5586,37 @@ const Police={list:[],sp:0,bust:0,
 {const cu=Car.prototype.update;Car.prototype.update=function(dt,ctl){if(this.cop&&!this.wreck&&this!==this.e.player.car)return cu.call(this,dt,Police.ctl(this,dt));return cu.call(this,dt,ctl)}}
 {const rc=Engine.prototype.respawnCar;Engine.prototype.respawnCar=function(c){if(c.cop){Police.drop(c);return}return rc.call(this,c)}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);try{Police.update(dt)}catch(x){console.warn('Polizei',x)}}}
+/* ===== Polizisten zu Fuß: steigen aus dem Streifenwagen, laufen zu dir, zielen; ab 3 Sternen schießen sie, darunter nehmen sie dich fest.
+   Vier Beamte im Pool (feste NPC-Plätze), unbenutzt unsichtbar abgestellt. Getroffen fallen sie um und sind aus dem Einsatz. ===== */
+Object.assign(Police,{cops:[],
+ pool(){const E=VX;if(this.cops.length||!AvatarLib.ok||!AvatarLib.has(AVS.police))return this.cops;
+  for(let k=0;k<4;k++){const n=new NPC(E,E.npcs.length,{kind:'stand',x:LIM-2,z:LIM-2-k*2,h:0,act:'cop'});const H=buildHumanoid({av:AVS.police,fem:0});
+   E.scene.remove(n.mesh);disposeHumanoid(n.mesh);n.mesh=H.mesh;n.rig=new Rig(H.bones);n.mat=H.mat;E.scene.add(n.mesh);
+   const gun=new THREE.Mesh(new THREE.BoxGeometry(.05,.11,.22),mat(0x111214,0,.4,.6));gun.position.set(0,-.04,.1);if(H.bones.haR)H.bones.haR.add(gun);
+   n.cop=true;n.on=false;n.state='cop';n.act0='cop';n.S.aimDir=new THREE.Vector3(0,0,1);n.mesh.visible=false;n.role='police';E.npcs.push(n);this.cops.push(n)}
+  E.col.setCircles(E.npcs.length);return this.cops},
+ park(n){n.on=false;n.x=LIM-2;n.z=LIM-2;n.copV=0;n.v=0;n.S.aim=false;n.state='cop';n.dead=false;n.hp=3;n.down=0},
+ deploy(c){const L=this.pool();const n=L.find(o=>!o.on);if(!n)return;const fx=Math.sin(c.h),fz=Math.cos(c.h);
+  const sd=(c.out||0)%2?-1:1;n.on=true;n.x=c.x-fz*1.6*sd+fx*rand(-.6,.6);n.z=c.z+fx*1.6*sd+fz*rand(-.6,.6);n.y=ground(n.x,n.z);n.h=c.h;n.state='cop';n.dead=false;n.hp=3;n.fT=rand(.8,1.6);c.out=(c.out||0)+1},
+ foot(dt){const E=VX,P=E.player,T=P.car||P;
+  for(const n of this.cops){n.active=n.on;if(!n.on){n.copV=0;n.mesh.visible=false;continue}
+   if(n.state=='up'||n.state=='down'&&n.st<.5||Wanted.stars==0&&Math.hypot(n.x-T.x,n.z-T.z)>40){this.park(n);continue}
+   if(!n.alive()||n.state!='cop'){n.S.aim=false;continue}
+   const dx=T.x-n.x,dz=T.z-n.z,d=Math.hypot(dx,dz);n.copH=Math.atan2(dx,dz);
+   const shoot=Wanted.stars>=3&&!P.dead,range=shoot?11:1.8;n.copV=d>range?(d>25?5.2:4.2):0;
+   const aim=shoot&&d<26||!shoot&&d<6;n.S.aim=aim;if(aim)n.S.aimDir.set(dx/d,((T.y||0)+1-(n.y+1.4))/d,dz/d).normalize();
+   if(shoot&&d<26&&(n.fT-=dt)<=0){n.fT=rand(.7,1.4);const mp=_v1.set(n.x+Math.sin(n.h)*.5,n.y+1.4,n.z+Math.cos(n.h)*.5),sp=Math.abs((P.car?P.car.vf:P.speed)||0);
+    const hit=Math.random()<clamp(.6-d*.015-sp*.025,.08,.55);try{E.fx.shot(mp,T.x+(hit?0:rand(-1.4,1.4)),(T.y||0)+1.1,T.z+(hit?0:rand(-1.4,1.4)),hit?'hit':'wall',dx/d,dz/d,false)}catch(x){}
+    if(E.sfx.shot)E.sfx.shot(0);n.S.recoil=1;if(hit)P.damage(P.car?3:7,'Polizei')}}}});
+/* Aussteigen: Streifenwagen nah dran und langsam (oder du bist zu Fuß in der Nähe) */
+{const pu=Police.update.bind(Police);Police.update=function(dt){pu(dt);const E=VX,P=E.player,T=P.car||P;
+  if(Wanted.stars>=2&&!E.zone)for(const c of this.list){const d=Math.hypot(T.x-c.x,T.z-c.z);if(d<20&&Math.abs(c.vf)<3&&(c.out||0)<2&&(c.outT=(c.outT||0)+dt)>.8){c.outT=-1.2;this.deploy(c)}}
+  this.foot(dt);
+  /* Festnahme auch durch Beamte zu Fuß */
+  if(!P.car&&!P.dead&&Wanted.stars>0&&Wanted.stars<3&&this.cops.some(n=>n.on&&n.alive()&&Math.hypot(P.x-n.x,P.z-n.z)<2.4))this.bust+=dt*1.5}}
+{const dr=Police.drop.bind(Police);Police.drop=function(c){dr(c);if(!this.list.length)this.cops.forEach(n=>{if(n.on&&Wanted.stars==0)this.park(n)})}}
+{const vn=Voice.npc.bind(Voice);Voice.npc=function(n,k,p,c){if(n&&n.cop)return false;return vn(n,k,p,c)}}
+{const bs=Police.busted.bind(Police);Police.busted=function(){bs();this.cops.forEach(n=>this.park(n))}}
 /* Ausgeschaltet wie in GTA V: Zeitlupe, weißer Blitz, Kamera zieht nach oben weg */
 {const w0=Engine.prototype.wasted;Engine.prototype.wasted=function(src){const P=this.player;if(P.dead)return w0.call(this,src);w0.call(this,src);
   try{World.smT=Math.max(World.smT||0,2.2)}catch(x){}const f=$('#swf');if(f){f.style.transition='opacity .08s';f.style.opacity=.9;setTimeout(()=>{f.style.transition='opacity 1.2s';f.style.opacity=0},90)}
