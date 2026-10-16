@@ -5452,7 +5452,7 @@ HUD.prototype.map=function(){const e=this.e,g=this.mg,c=this.mc,W=c.width,H=c.he
  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);
  g.save();g.beginPath();g.rect(0,0,W,MH);g.fillStyle='#808489';g.fill();g.clip();
  g.translate(cx,cy);g.rotate(yaw+Math.PI);g.scale(zoom,zoom);g.translate(-px,-pz);drawCity(g,zoom);
- for(const cr of e.cars){if(!cr.vis&&cr!==P.car)continue;if(cr===P.car)continue;g.fillStyle='rgba(200,200,200,.5)';g.fillRect(cr.x-1.4,cr.z-1.4,2.8,2.8)}
+ const fl=(GU.uTime.value*4)%2<1;for(const cr of e.cars){if(cr===P.car)continue;if(cr.cop){g.fillStyle=fl?'#ff2a3a':'#2a6bff';g.beginPath();g.arc(cr.x,cr.z,3.2,0,TAU);g.fill();continue}if(!cr.vis)continue;g.fillStyle='rgba(200,200,200,.5)';g.fillRect(cr.x-1.4,cr.z-1.4,2.8,2.8)}
  const is=4.6/zoom*sc;CITY.POI.forEach(([n,x,z,col,ch])=>{if(Math.abs(x-px)<170&&Math.abs(z-pz)<170){g.save();g.translate(x,z);g.rotate(-(yaw+Math.PI));drawIcon(g,0,0,col,ch,is);g.restore()}});
  (e.city.gasList||[]).forEach(([x,z])=>{g.save();g.translate(x,z-4);g.rotate(-(yaw+Math.PI));drawIcon(g,0,0,'#e8e8e8','⛽',is);g.restore()});
  if(Nav.wp){g.save();g.translate(Nav.wp.x,Nav.wp.z);g.rotate(-(yaw+Math.PI));drawIcon(g,0,0,'#c06cff','◆',is*1.1);g.restore()}
@@ -5527,6 +5527,58 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* ===== Polizei wie in GTA V: Ab einem Stern rücken Streifenwagen an (pro Stern einer, höchstens vier), mit Blaulicht (rot/blau) und Sirene.
+   Sie fahren dir hinterher; erwischen sie dich zu Fuß und du bleibst stehen, wirst du verhaftet (−$100, Sterne weg).
+   Ohne Sterne drehen sie ab und verschwinden. Ein Streifenwagen kann – wie in GTA – auch geklaut werden. ===== */
+const Police={list:[],sp:0,bust:0,
+ mats(){if(this.M)return this.M;return this.M={r:glow(0xff1830,4),b:glow(0x1a5cff,4),off:mat(0x16181c,0,.4,.5),bar:mat(0x0c0d10,0,.5,.4)}},
+ make(){const E=VX,c=new Car(E,0,0,0,11,true);let t=0;const P=E.player.car||E.player;
+  do{c.placeAI();t++}while(t<40&&(Math.hypot(c.x-P.x,c.z-P.z)<55||Math.hypot(c.x-P.x,c.z-P.z)>120));
+  c.ai=false;c.cop=true;c.hp=14;try{c.paint.color.setHex(0x15171c)}catch(x){}
+  const M=this.mats(),g=new THREE.Group(),bx=(w,h,d,m,x)=>{const q=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);q.position.x=x;g.add(q);return q};
+  bx(1.36,.12,.36,M.bar,0);c.lr=bx(.6,.15,.3,M.r,-.34);c.lb=bx(.6,.15,.3,M.b,.34);g.position.set(0,1.52,-.15);c.mesh.add(g);c.bar=g;
+  c.stuck=0;E.cars.push(c);this.list.push(c);return c},
+ drop(c){const E=VX;c.cop=false;if(c.bar){c.mesh.remove(c.bar);c.bar=null}const i=this.list.indexOf(c);if(i>=0)this.list.splice(i,1);
+  if(c!==E.player.car){E.scene.remove(c.mesh);const k=E.cars.indexOf(c);if(k>=0)E.cars.splice(k,1)}},
+ ctl(c,dt){const E=VX,P=E.player,T=P.car||P,dx=T.x-c.x,dz=T.z-c.z,dist=Math.hypot(dx,dz),chase=Wanted.stars>0;
+  let tx=T.x,tz=T.z;
+  /* weiter weg: über die Kreuzungen des Straßenrasters fahren (nächste Kreuzung, die näher zum Ziel liegt) */
+  const onRoad=(x,z)=>Math.min(Math.abs(x-Math.round(x/S)*S),Math.abs(z-Math.round(z/S)*S))<5;
+  if(!chase||dist>22||!onRoad(T.x,T.z)&&dist>10){const gx=chase?T.x:c.x+Math.sin(c.h)*200,gz=chase?T.z:c.z+Math.cos(c.h)*200;
+   if(c.pi==null){c.pi=clamp(Math.round(c.x/S),-4,4);c.pj=clamp(Math.round(c.z/S),-4,4)}
+   let ix=c.pi*S,iz=c.pj*S;if(Math.hypot(ix-c.x,iz-c.z)<7){let best=null,bd=1e9;
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const ni=c.pi+a,nj=c.pj+b;if(ni<-4||ni>4||nj<-4||nj>4)return;if(c.lastI&&c.lastI[0]==ni&&c.lastI[1]==nj)return;
+     const d=Math.hypot(ni*S-gx,nj*S-gz)+Math.random()*4;if(d<bd){bd=d;best=[ni,nj]}});
+    if(best){c.lastI=[c.pi,c.pj];c.pi=best[0];c.pj=best[1];ix=c.pi*S;iz=c.pj*S}}
+   tx=ix;tz=iz}
+  const ang=wrapPI(Math.atan2(tx-c.x,tz-c.z)-c.h);let want=chase?(dist>40?26:dist>15?17:Math.max(0,(dist-6)*1.6)):12;if(Math.abs(ang)>.9)want=Math.min(want,7);
+  const rev=c.stuck>1.6;if(rev&&chase){c.stuck-=dt*.5;return{thr:-1,brake:0,steer:-clamp(ang*1.4,-1,1),hand:0}}
+  const thr=clamp((want-c.vf)*.4,-1,1);return{thr:thr>0?thr:0,brake:thr<-.05?-thr:0,steer:clamp(ang*1.8,-1,1),hand:Math.abs(ang)>1.2&&c.vf>12?1:0}},
+ siren(){const s=VX.sfx;if(!s||!s.ctx||this.osc)return;try{const c=s.ctx,o=c.createOscillator(),l=c.createOscillator(),lg=c.createGain(),f=c.createBiquadFilter(),g=c.createGain();
+  o.type='sawtooth';o.frequency.value=900;l.frequency.value=.45;lg.gain.value=320;l.connect(lg);lg.connect(o.frequency);f.type='lowpass';f.frequency.value=2200;g.gain.value=0;
+  o.connect(f);f.connect(g);g.connect(s.master||c.destination);o.start();l.start();Object.assign(this,{osc:o,lfo:l,sg:g})}catch(x){}},
+ update(dt){const E=VX,P=E.player;if(!E.playing&&!this.list.length)return;
+  for(const c of this.list.slice()){if(c===P.car||c.wreck){this.drop(c);continue}}
+  const want=E.zone||P.dead?0:Math.min(4,Wanted.stars);
+  if(this.list.length<want&&(this.sp-=dt)<=0){this.sp=4;this.make()}
+  let near=1e9;const t=GU.uTime.value,ph=(t*6)%2<1;
+  for(const c of this.list){const T=P.car||P,d=Math.hypot(T.x-c.x,T.z-c.z);near=Math.min(near,d);
+   if(c.lr){c.lr.material=ph?this.M.r:this.M.off;c.lb.material=ph?this.M.off:this.M.b}
+   if(Math.abs(c.vf)<1&&d>12&&Wanted.stars>0)c.stuck+=dt;else c.stuck=Math.max(0,c.stuck-dt);
+   if(c.stuck>6){c.stuck=0;c.pi=null;c.lastI=null;let k=0;do{c.placeAI();k++}while(k<30&&Math.hypot(c.x-T.x,c.z-T.z)<45);c.vx=c.vz=0}
+   if(Wanted.stars==0&&d>90)this.drop(c)}
+  /* Sirene: lauter, je näher der nächste Streifenwagen ist */
+  if(this.list.length&&Wanted.stars>0)this.siren();
+  if(this.sg){const vo=(E.set.vol==null?80:E.set.vol)/100,k=this.list.length&&Wanted.stars>0&&E.playing?clamp(1-near/140,0,1)*.07*vo:0;this.sg.gain.value+=(k-this.sg.gain.value)*Math.min(1,dt*3)}
+  /* Verhaften: zu Fuß, langsam, Streifenwagen steht neben dir */
+  if(!P.car&&!P.dead&&Wanted.stars>0&&this.list.some(c=>Math.hypot(P.x-c.x,P.z-c.z)<6&&Math.abs(c.vf)<2)&&(P.speed||0)<2)this.bust+=dt;else this.bust=Math.max(0,this.bust-dt*2);
+  if(this.bust>2.2){this.bust=0;this.busted()}},
+ busted(){const E=VX;Wanted.heat=0;Wanted.upd();Wallet.add&&Wallet.add(-100);
+  const d=$('#dead'),h=d.querySelector('h2'),old=h.textContent;h.textContent='VERHAFTET';$('#deadp').textContent='−$100 · Kaution';d.classList.add('on');E.cvs.classList.add('dead');E.sfx.hit&&E.sfx.hit();
+  E.input.enabled=false;setTimeout(()=>{d.classList.remove('on');h.textContent=old;E.cvs.classList.remove('dead');const sp=E.spawnPoint();E.player.teleport(sp[0],.3,sp[1]);E.input.enabled=E.playing;this.list.slice().forEach(c=>this.drop(c))},3200)}};
+{const cu=Car.prototype.update;Car.prototype.update=function(dt,ctl){if(this.cop&&!this.wreck&&this!==this.e.player.car)return cu.call(this,dt,Police.ctl(this,dt));return cu.call(this,dt,ctl)}}
+{const rc=Engine.prototype.respawnCar;Engine.prototype.respawnCar=function(c){if(c.cop){Police.drop(c);return}return rc.call(this,c)}}
+{const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);try{Police.update(dt)}catch(x){console.warn('Polizei',x)}}}
 /* Ausgeschaltet wie in GTA V: Zeitlupe, weißer Blitz, Kamera zieht nach oben weg */
 {const w0=Engine.prototype.wasted;Engine.prototype.wasted=function(src){const P=this.player;if(P.dead)return w0.call(this,src);w0.call(this,src);
   try{World.smT=Math.max(World.smT||0,2.2)}catch(x){}const f=$('#swf');if(f){f.style.transition='opacity .08s';f.style.opacity=.9;setTimeout(()=>{f.style.transition='opacity 1.2s';f.style.opacity=0},90)}
