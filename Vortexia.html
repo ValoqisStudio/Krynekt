@@ -742,7 +742,7 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  vec2 mc=floor(q/17.),mp=fract(q/17.)-.5;float mh=h21(mc);float man=step(.8,mh)*smoothstep(.07,.06,length(mp-(vec2(h21(mc+1.3),h21(mc+2.7))-.5)*.4))*step(.5,float(vroad||hroad));
  base=mix(base,vec3(.04),man);
  float wear=.55+.45*vn(q*3.);GH=-crack*.02+clamp(mk,0.,1.)*.002-man*.015+fbm(q*4.)*.006;
- vec3 col=mix(base,mark*(.55+.45*wear),clamp(mk,0.,1.)*.92);
+ vec3 col=mix(base,mark*.78*(.55+.45*wear),clamp(mk,0.,1.)*.92);
  /* Nässe: Pfützen = glatt + dunkel + stark spiegelnd */
  float wet=smoothstep(.42,.66,fbm(q*.045+7.)+.25*vn(q*.3));wet=mix(.03,max(wet,.3),uWet)*(1.-uSnowC*.9);
  wet=max(wet,gut*.22*(.4+.6*uWet));alb=col*mix(1.,.55,wet)*mix(.8,1.25,uDay);ro=mix(.82-.14*wtrk*(1.-mk),.05,wet);me=.15;
@@ -754,7 +754,7 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  /* Schneedecke mit Reifenspuren auf den Fahrspuren */
  if(uSnowC>.01){float trk=0.;if(vroad)trk=max(trk,smoothstep(.5,.15,abs(abs(ax-3.)-.8)));if(hroad)trk=max(trk,smoothstep(.5,.15,abs(abs(az-3.)-.8)));
   vec3 snow=vec3(.82,.85,.9)*(.85+.15*fbm(q*2.));float cov=uSnowC*(1.-trk*.75);alb=mix(alb,snow,cov);ro=mix(ro,.9,cov);em*=1.-cov*.85;}
- em+=mark*clamp(mk,0.,1.)*.06*wear;
+ em+=mark*clamp(mk,0.,1.)*.06*wear*(1.-uDay);
 }
 `;
 /* ---- Glas (Lobby-Front): Fresnel-Transparenz + Himmelsspiegelung ---- */
