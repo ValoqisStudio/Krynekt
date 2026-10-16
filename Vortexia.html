@@ -2564,10 +2564,10 @@ class HUD{
 /* ===== Waffen: 4 Waffen (Pistole, MP, Schrotflinte, Gewehr mit Zoom), Magazin + Nachladen, Streuung, Rückstoß,
    Treffer an Passanten, Autos (Schaden -> Explosion), Online-Spielern. Spieler-Leben + Ausgeschaltet + Respawn ===== */
 const WEAPONS=[
- {n:'VX-9 Pistole',dmg:1,rate:.17,auto:false,mag:15,spread:.011,pel:1,range:90,reload:1.1,kick:.018,fov:50,len:.235},
- {n:'Sturm-MP',dmg:.62,rate:.075,auto:true,mag:32,spread:.03,pel:1,range:70,reload:1.6,kick:.011,fov:52,len:.36},
- {n:'Breaker',dmg:.6,rate:.75,auto:false,mag:6,spread:.085,pel:8,range:34,reload:2.1,kick:.05,fov:54,len:.62},
- {n:'Longshot',dmg:3.4,rate:1.05,auto:false,mag:5,spread:.0015,pel:1,range:170,reload:2.4,kick:.06,fov:24,len:.78}];
+ {n:'Pistole',dmg:1,rate:.17,auto:false,mag:15,spread:.011,pel:1,range:90,reload:1.1,kick:.018,fov:50,len:.235},
+ {n:'Maschinenpistole',dmg:.62,rate:.075,auto:true,mag:32,spread:.03,pel:1,range:70,reload:1.6,kick:.011,fov:52,len:.36},
+ {n:'Schrotflinte',dmg:.6,rate:.75,auto:false,mag:6,spread:.085,pel:8,range:34,reload:2.1,kick:.05,fov:54,len:.62},
+ {n:'Scharfschützengewehr',dmg:3.4,rate:1.05,auto:false,mag:5,spread:.0015,pel:1,range:170,reload:2.4,kick:.06,fov:24,len:.78}];
 const WICON=['<svg viewBox="0 0 64 32"><path d="M6 9h44v7H28l-3 12h-8l3-12H6z"/></svg>','<svg viewBox="0 0 64 32"><path d="M4 9h50v6h6v3h-6v3H34l-2 9h-7l2-9h-6l-2 9h-7l3-9H4z"/></svg>',
  '<svg viewBox="0 0 64 32"><path d="M2 11h48v5H24l-6 10H8l5-10H2z"/><path d="M50 12h12v3H50z"/></svg>','<svg viewBox="0 0 64 32"><path d="M2 13h56v4H30l-5 9h-8l4-9H2z"/><path d="M24 7h18v5H24z"/></svg>'];
 function buildGun(k){const g=new THREE.Group(),dm=mat(0x1b1d26,0,.3,.85),gr=mat(0x0c0d12,0,.7,.3),wd=mat(0x3a2414,0,.6,.1),ac=glow([0x19e6ff,0xff2d95,0xffd23c,0x3cff9a][k],2.2);
@@ -2714,7 +2714,7 @@ const SHOPS={
   greet:['Guten Tag. Ich hab alles, was Sie brauchen.','Willkommen bei Kowalski. Keine Fragen, keine Namen.','Na? Schon wieder Munition leer?'],
   buy:['Gute Entscheidung.','Passen Sie gut darauf auf.','Und denken Sie dran… Sie waren nie hier.'],poor:['Ohne Geld kein Geschäft.'],bye:['Bleiben Sie sicher da draußen.','Auf Wiedersehen.'],
   items:[{i:'🎯',n:'Munitionspaket',d:'Alle Magazine voll',p:40,fx:{ammo:1}},{i:'🦺',n:'Schutzweste',d:'Fängt 70 % Schaden ab',p:120,fx:{armor:100}},
-   {i:'🔫',n:'Sturm-MP',d:'Dauerfeuer, 32 Schuss',p:250,fx:{weapon:1}},{i:'💥',n:'Breaker Schrotflinte',d:'8 Kugeln pro Schuss',p:450,fx:{weapon:2}},{i:'🔭',n:'Longshot Gewehr',d:'Zielfernrohr, hoher Schaden',p:800,fx:{weapon:3}}]},
+   {i:'🔫',n:'Maschinenpistole',d:'Dauerfeuer, 32 Schuss',p:250,fx:{weapon:1}},{i:'💥',n:'Schrotflinte',d:'8 Kugeln pro Schuss',p:450,fx:{weapon:2}},{i:'🔭',n:'Scharfschützengewehr',d:'Zielfernrohr, hoher Schaden',p:800,fx:{weapon:3}}]},
  mode:{n:'Neon Style',who:'Lina',col:'#ff4fd8',voice:{pitch:1.25,rate:1.08},
   greet:['Hey! Willkommen bei Neon Style! Die neue Kollektion ist da!','Hi! Such dir was Schönes aus, ich berate dich gern.','Die Gold-Edition ist gerade sooo beliebt!'],
   buy:['Wow, steht dir mega!','Perfekt, das ist voll dein Style!','Damit bist du der Hingucker in ganz Vortex City!'],poor:['Ohh… leider zu wenig Geld. Schade!'],bye:['Ciao, bis bald!','Tschüss, viel Spaß beim Tragen!'],
