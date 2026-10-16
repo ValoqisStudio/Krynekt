@@ -5464,7 +5464,8 @@ body.touch #hint{left:50%!important;top:auto!important;bottom:calc(14px + var(--
 #gsub{position:fixed;z-index:6;left:50%;bottom:calc(9vh + var(--sab));transform:translateX(-50%);width:min(78vw,820px);text-align:center;pointer-events:none;
  font:500 clamp(15px,1.9vw,21px)/1.3 var(--ui);color:#fff;text-shadow:0 0 3px #000,0 1px 2px #000,0 0 8px #000c;opacity:0;transition:opacity .2s}
 #gsub.on{opacity:1}#gsub b{font-weight:700}
-body.touch #gsub{bottom:calc(var(--u)*3.1 + var(--sab))}
+body.touch #gsub{bottom:calc(10px + var(--sab));width:min(54vw,560px);font-size:clamp(13px,1.7vw,18px)}
+@media (orientation:portrait){body.touch #gsub{bottom:calc(var(--u)*3.1 + var(--sab));width:84vw}}
 @media (max-height:430px){#area b{font-size:22px!important}#area span{font-size:12px!important}#cashv{font-size:26px!important}#wpa{font-size:20px!important}#clk{top:calc(138px + var(--sat))!important}#wnt{top:calc(158px + var(--sat))!important}body:not(.touch) #area{bottom:calc(14px + var(--sab))!important}}
 #area b{font:italic 400 32px/1 var(--disp)!important;letter-spacing:.02em;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000!important}
 #area span{color:#fff!important;font:500 15px var(--ui)!important;opacity:.92}
