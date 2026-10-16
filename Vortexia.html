@@ -3101,7 +3101,7 @@ const Intro={
    const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#16345e');sky.addColorStop(.36,'#4f6f96');sky.addColorStop(.6,'#e0905a');sky.addColorStop(.8,'#ffc070');sky.addColorStop(1,'#ffe0a8');g.fillStyle=sky;g.fillRect(0,0,W,H);
    const sx=W*.66,sy=H*.6,sr=Math.min(W,H)*.12,sg=g.createRadialGradient(sx,sy,0,sx,sy,sr*4);sg.addColorStop(0,'rgba(255,252,225,1)');sg.addColorStop(.22,'rgba(255,232,160,.9)');sg.addColorStop(.55,'rgba(255,170,100,.3)');sg.addColorStop(1,'rgba(255,140,90,0)');
    g.fillStyle=sg;g.fillRect(0,0,W,H);g.fillStyle='#fff7da';g.beginPath();g.arc(sx,sy,sr,0,TAU);g.fill();
-   g.fillStyle='rgba(255,226,190,.07)';for(let i=0;i<5;i++){const y=H*(.2+i*.07),o=(t*.004*(i+1))%W;g.fillRect(-o,y,W*2,H*.012*(1+i%2))}
+   g.fillStyle='rgba(255,226,190,.035)';for(let i=0;i<5;i++){const y=H*(.2+i*.07),o=(t*.004*(i+1))%W;g.fillRect(-o,y,W*2,H*.012*(1+i%2))}
    birds.forEach(b=>{const x=((b[0]*W+t*.03*b[2]*k)%(W*1.2))-W*.1,y=b[1]*H+Math.sin(t*.002+b[3])*8*k,s=7*k*b[2],f=Math.sin(t*.012*b[2]+b[3])*.6;g.strokeStyle='rgba(20,18,24,.75)';g.lineWidth=2*k;g.beginPath();g.moveTo(x-s,y-s*f);g.quadraticCurveTo(x-s*.4,y-s*.2,x,y);g.quadraticCurveTo(x+s*.4,y-s*.2,x+s,y-s*f);g.stroke()});
    layers.slice().reverse().forEach((L,li)=>{const l=2-li,sp=(l+1)*5,off=(t*.001*sp)%1200,col=['#6d6a78','#3a3540','#121016'][l];
     L.forEach(([x,w,h,r])=>{const X=((x-off)%2400+2400)%2400*k-W*.1,Y=H*(1-h),Wd=w*k;g.fillStyle=col;g.fillRect(X,Y,Wd,H);
@@ -5405,7 +5405,7 @@ const Doors={list:[],cur:null,
 const GTAUI={
  COL:{vincent:'#6fb1f0',darnell:'#8fdc7a',rocco:'#ffaa48'},
  css:`:root{--ac:#6fa8dc;--ac2:#d8a330}
-#map{width:250px!important;height:178px!important;left:calc(22px + var(--sal))!important;bottom:calc(20px + var(--sab))!important;border-radius:3px;filter:drop-shadow(0 2px 6px #000a)!important}
+#map{width:clamp(170px,19vw,260px)!important;height:clamp(121px,13.5vw,185px)!important;left:calc(22px + var(--sal))!important;bottom:calc(20px + var(--sab))!important;border-radius:3px;filter:drop-shadow(0 2px 6px #000a)!important}
 body.touch #map{width:178px!important;height:128px!important;top:calc(10px + var(--sat))!important;bottom:auto!important;left:calc(10px + var(--sal))!important}
 #hpw,#zone{display:none!important}
 #top button{background:#000000a8!important;border:0!important;border-radius:2px!important;font:600 13px var(--ui)!important;letter-spacing:.04em;box-shadow:none!important}#top button:hover{background:#000d!important}
