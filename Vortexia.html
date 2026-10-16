@@ -5531,6 +5531,15 @@ body.touch #wnt{top:calc(174px + var(--sat))}#wnt i{width:clamp(18px,2.4vw,24px)
 {const eu=Engine.prototype.use;Engine.prototype.use=function(force){const P=this.player,c=!P.car?this.nearCar:null,was=!!(c&&c.ai&&!c.wreck);const r=eu.call(this,force);if(was&&P.car===c)Wanted.crime(1.2);return r}}
 {const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);Wanted.update(dt)}}
 Wanted.init();
+/* Belebte Bürgersteige wie in GTA: weit entfernte, unsichtbare Spaziergänger werden in Blöcke rund um den Spieler versetzt (außer Sicht) */
+const Crowd={t:0,
+ update(dt){const E=VX,P=E.player;if(!E.playing||E.zone||(this.t-=dt)>0)return;this.t=.7;const T=P.car||P;let moved=0;
+  for(const n of E.npcs){if(moved>=2)break;if(!n.active||n.kind!='walk'||n.cop||n.crowd||n.bench||n.state!='walk')continue;
+   if(Math.hypot(n.x-T.x,n.z-T.z)<120||n.vis)continue;
+   for(let k=0;k<6;k++){const bx=(Math.floor(T.x/S)+((Math.random()*5)|0)-2)*S+S/2,bz=(Math.floor(T.z/S)+((Math.random()*5)|0)-2)*S+S/2;
+    if(Math.abs(bx)>LIM-20||Math.abs(bz)>LIM-20||inPark(bx,bz))continue;const sp=Math.random()*8*n.hh,q=ringPos(sp,n.hh),x=bx+q[0],z=bz+q[1],d=Math.hypot(x-T.x,z-T.z);
+    if(d<38||d>95||E.inView(x,1,z,1.5))continue;n.cx=bx;n.cz=bz;n.s=sp;n.x=x;n.z=z;n.y=ground(x,z);n.mesh.position.set(x,n.y,z);moved++;break}}}};
+{const up=Engine.prototype.update;Engine.prototype.update=function(dt){up.call(this,dt);try{Crowd.update(dt)}catch(x){}}}
 /* ===== Feuertreppen wie in Downtown Los Santos: an Backstein- und manchen Putzhäusern, pro Etage Plattform + Geländer + schräge Treppe,
    unten eine hochgeklappte Leiter. Alles in EINEM Mesh (ein Draw-Call), wirft Schatten. ===== */
 const FireEsc={
