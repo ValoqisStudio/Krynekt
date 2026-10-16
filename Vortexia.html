@@ -706,7 +706,7 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  bool vroad=ax<R_*.5,hroad=az<R_*.5;
  vec3 base=vec3(.175,.168,.158)*(.82+.36*fbm(q*.9))*(1.+.25*smoothstep(.4,.8,fbm(q*.05+11.)));
  base*=1.-.35*smoothstep(.55,.9,fbm(q*.12+3.));        /* Ölflecken */
- float crack=smoothstep(.012,0.,abs(fbm(q*.7)-.5)-.002)*.22*smoothstep(.45,.6,vn(q*.08+5.));base*=1.-crack;
+ float crack=smoothstep(.008,0.,abs(fbm(q*.7+fbm(q*2.3)*.6)-.5)-.001)*.13*smoothstep(.55,.7,vn(q*.08+5.));base*=1.-crack;
  /* Reifenspuren je Fahrspur (dunkler, glatter), Rinnstein mit Schmutz, Flickstellen, Splitt aus der Nähe */
  float wtrk=0.,gut=0.;
  if(vroad&&az>R_*.5){wtrk=max(wtrk,smoothstep(.55,.12,abs(abs(ax-3.)-.85)));gut=max(gut,smoothstep(6.25,6.9,ax));}
