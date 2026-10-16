@@ -857,7 +857,7 @@ const FS_COMP=`
 uniform sampler2D tScene,tDepth,tB0,tB1,tB2,tB3;uniform float uExp,uCA,uStreak,uStreakPx,uLight,uAO,uMB,uLens,uNear,uFar;
 uniform vec2 uRes;uniform mat4 uInvProj,uCamWorld;uniform vec3 uCam;
 uniform float uBloom,uVol,uFogD,uAir,uFxaa,uVig,uMaxD;uniform int uSteps;
-uniform vec4 uL[8];uniform vec3 uLC[8];uniform vec4 uLD[2];uniform vec3 uSunS;
+uniform vec4 uL[8];uniform vec3 uLC[8];uniform vec4 uLD[2];uniform vec3 uSunS,uC00,uC10,uC01,uC11;
 varying vec2 vUv;
 /* Sonnenblendung wie in GTA V: Glühen um die Sonne, Strahlenkranz, Reflexe entlang der Linie Sonne→Bildmitte; nur wenn die Sonne frei sichtbar ist */
 vec3 sunFlare(vec2 uv){if(uSunS.z<=0.)return vec3(0.);vec2 sp=uSunS.xy,px=1./uRes;float vis=0.;
@@ -923,7 +923,7 @@ void main(){
   vec3 ray=(uCamWorld*vec4(v.xyz,1.)).xyz-uCam;float dist=length(ray);vec3 rd=ray/max(dist,1e-4);
   if(d>.99999)dist=uMaxD;
   col=volumetric(col,uCam,rd,dist,gl_FragCoord.xy);}
- {float dz=texture2D(tDepth,uv).x;if(dz<.99999){float dd=linD(dz);vec4 hv=uInvProj*vec4(uv*2.-1.,dz*2.-1.,1.);hv/=hv.w;vec3 hrd=normalize((uCamWorld*vec4(hv.xyz,1.)).xyz-uCam);
+ if(uDay>.01){float dz=texture2D(tDepth,uv).x;if(dz<.99999){float dd=linD(dz);vec3 hrd=normalize(mix(mix(uC00,uC10,uv.x),mix(uC01,uC11,uv.x),uv.y));
   float sd=pow(max(dot(hrd,SUN),0.),3.),hz=(1.-exp(-max(dd-15.,0.)*.0028))*uDay*mix(.4,.58,sd);
   col=mix(col,mix(vec3(.66,.76,.9),vec3(1.08,.93,.72)*1.15,sd),hz);}}
  col=tonemap(col);
@@ -951,7 +951,7 @@ class PostFX{
   this.mDown=mk(FS_DOWN,{tIn:{value:null},uTexel:V2()});this.mBlur=mk(FS_BLUR,{tIn:{value:null},uDir:V2()});
   this.lA=new Float32Array(32);this.lC=new Float32Array(24);this.lD=new Float32Array(8);
   this.mComp=mk(FS_COMP,{uDay:GU.uDay,uDusk:GU.uDusk,uCloud:GU.uCloud,uSun:GU.uSun,uMoon:GU.uMoon,tScene:{value:null},tDepth:{value:null},tB0:{value:null},tB1:{value:null},tB2:{value:null},tB3:{value:null},uExp:{value:.92},uCA:{value:1},uAO:{value:0},uMB:{value:0},uLens:{value:0},uNear:{value:.12},uFar:{value:1400},uStreak:{value:1},uStreakPx:{value:.004},uLight:{value:0},uRes:V2(),uInvProj:{value:new THREE.Matrix4()},uCamWorld:{value:new THREE.Matrix4()},uCam:{value:new THREE.Vector3()},
-   uBloom:{value:.55},uVol:{value:1},uFogD:{value:.02},uAir:{value:1},uFxaa:{value:1},uVig:{value:1},uMaxD:{value:150},uSteps:{value:12},uL:{value:this.lA},uLC:{value:this.lC},uLD:{value:this.lD},uSunS:{value:new THREE.Vector3()},uTime:GU.uTime},true);
+   uBloom:{value:.55},uVol:{value:1},uFogD:{value:.02},uAir:{value:1},uFxaa:{value:1},uVig:{value:1},uMaxD:{value:150},uSteps:{value:12},uL:{value:this.lA},uLC:{value:this.lC},uLD:{value:this.lD},uSunS:{value:new THREE.Vector3()},uC00:{value:new THREE.Vector3()},uC10:{value:new THREE.Vector3()},uC01:{value:new THREE.Vector3()},uC11:{value:new THREE.Vector3()},uTime:GU.uTime},true);
   this.blank=new THREE.DataTexture(new Uint8Array([0,0,0,255]),1,1);this.blank.needsUpdate=true;RF.tRefl.value=this.blank;
   this.vcam=new THREE.PerspectiveCamera();this.plane=new THREE.Plane(new THREE.Vector3(0,1,0),-.32);this.tm=new THREE.Matrix4();
   this.rs=null;this.bl=[];this.rr=null;this.stat={passes:0}}
@@ -990,6 +990,7 @@ class PostFX{
   const u=this.mComp.uniforms;u.tScene.value=this.rs.texture;u.tDepth.value=this.rs.depthTexture;u.tB0.value=bl[0].a.texture;u.tB1.value=bl[1].a.texture;u.tB2.value=bl[2].a.texture;u.tB3.value=bl[3].a.texture;u.uLight.value=GU.flash||0;
   {const sv=_p1.copy(GU.uSun.value).multiplyScalar(900).add(_p2.setFromMatrixPosition(cam.matrixWorld)).project(cam),ss=u.uSunS.value;ss.set(sv.x*.5+.5,sv.y*.5+.5,0);
    if(sv.z<1&&GU.uSun.value.y>-.02&&Math.abs(sv.x)<1.15&&Math.abs(sv.y)<1.15)ss.z=Math.min(1,(1.15-Math.max(Math.abs(sv.x),Math.abs(sv.y)))*4)*(1-clamp(GU.uCloud.value-.4,0,1))*(this.flare===false?0:1)}
+  {const cp=_p2.setFromMatrixPosition(cam.matrixWorld);[['uC00',-1,-1],['uC10',1,-1],['uC01',-1,1],['uC11',1,1]].forEach(([k,x,y])=>u[k].value.set(x,y,1).unproject(cam).sub(cp))}
   u.uInvProj.value.copy(cam.projectionMatrixInverse);u.uCamWorld.value.copy(cam.matrixWorld);u.uCam.value.setFromMatrixPosition(cam.matrixWorld);
   u.uFogD.value=o.fogD;u.uAir.value=o.air;u.uVig.value=o.vig;
   this.lA.fill(0);this.lD.fill(0);const L=o.lights||[];
@@ -5424,6 +5425,7 @@ body.touch #hint{left:50%!important;top:auto!important;bottom:calc(14px + var(--
  font:500 clamp(15px,1.9vw,21px)/1.3 var(--ui);color:#fff;text-shadow:0 0 3px #000,0 1px 2px #000,0 0 8px #000c;opacity:0;transition:opacity .2s}
 #gsub.on{opacity:1}#gsub b{font-weight:700}
 body.touch #gsub{bottom:calc(var(--u)*3.1 + var(--sab))}
+@media (max-height:430px){#area b{font-size:22px!important}#area span{font-size:12px!important}#cashv{font-size:26px!important}#wpa{font-size:20px!important}#clk{top:calc(118px + var(--sat))!important}#wnt{top:calc(138px + var(--sat))!important}body:not(.touch) #area{bottom:calc(14px + var(--sab))!important}}
 #area b{font:italic 400 32px/1 var(--disp)!important;letter-spacing:.02em;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000!important}
 #area span{color:#fff!important;font:500 15px var(--ui)!important;opacity:.92}
 #msg{font:400 clamp(30px,5vw,58px)/1 var(--disp)!important;color:#f2c23a!important;text-shadow:-3px -3px 0 #000,3px -3px 0 #000,-3px 3px 0 #000,3px 3px 0 #000,0 6px 14px #000!important}
