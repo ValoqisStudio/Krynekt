@@ -261,7 +261,7 @@ body.touch #area b{font-size:22px}body.touch #area span{font-size:12px}
 body:not(.play) #area{display:none!important}
 #map{pointer-events:auto;cursor:pointer}
 /* Große Karte */
-#bigmap{position:fixed;inset:0;z-index:60;display:none;background:#0c1220;color:#fff;font-family:var(--ui)}
+#bigmap{position:fixed;inset:0;z-index:60;display:none;background:#4f6378;color:#fff;font-family:var(--ui)}
 #bigmap.on{display:block;animation:bmIn .25s ease-out}@keyframes bmIn{from{opacity:0;transform:scale(1.03)}}
 #bmc{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;display:block}
 .bm-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 16px;padding:calc(12px + var(--sat)) calc(18px + var(--sar)) 26px calc(18px + var(--sal));background:linear-gradient(#000d,#0000);pointer-events:none}
@@ -286,7 +286,7 @@ body:not(.play) #area{display:none!important}
 #act span{display:block;font:600 12px/1.3 'Chakra Petch',var(--ui);color:#fff;opacity:.85}
 body:not(.play) #act{display:none!important}
 body.touch #act{top:calc(150px + var(--sat))}body.touch #act b{font-size:26px}
-.bm-leg{position:absolute;right:calc(14px + var(--sar));top:calc(66px + var(--sat));display:flex;flex-direction:column;gap:1px;max-height:calc(100% - 170px);overflow:auto;background:#0a0f1cd9;border:1px solid #ffffff1f;padding:8px 6px;border-radius:4px;min-width:190px}
+.bm-leg{position:absolute;right:calc(14px + var(--sar));top:calc(66px + var(--sat));display:flex;flex-direction:column;gap:1px;max-height:calc(100% - 170px);overflow:auto;background:#000000c0;border:0;padding:8px 6px;border-radius:4px;min-width:190px}
 .bm-leg small{font:600 10px var(--ui);letter-spacing:.18em;color:var(--gold);padding:0 8px 6px}
 .bm-leg button{all:unset;display:flex;align-items:center;gap:9px;font:600 12.5px var(--ui);padding:5px 8px;cursor:pointer;border-radius:3px;color:#fff}
 .bm-leg button:hover,.bm-leg button:focus-visible{background:#ffffff18}
@@ -3947,7 +3947,7 @@ function drawCity(g,zoom,opt){const E=VX;opt=opt||{};
  g.fillStyle=opt.full?'#2c6fb0':'rgba(74,118,160,.97)';g.beginPath();seShape(PARK.rx,PARK.rz,48).forEach(([x,z],i)=>i?g.lineTo(x,z):g.moveTo(x,z));g.closePath();g.fill();
  g.fillStyle='#8a6a48';g.fillRect(PARK.pier[0],PARK.pier[2],PARK.pier[1]-PARK.pier[0],PARK.pier[3]-PARK.pier[2]);
  E.city.zones.forEach(Z=>{g.fillStyle='rgba('+Z.light.map(v=>v*255|0).join(',')+','+(opt.full?.8:.22)+')';g.fillRect(Z.x0,Z.z0,Z.x1-Z.x0,Z.z1-Z.z0)});
- g.strokeStyle=opt.full?'#6b7590':'rgba(190,194,198,.55)';g.lineWidth=(opt.full?3.2:2.2)/zoom;g.beginPath();
+ g.strokeStyle=opt.full?'#b9bcc0':'rgba(190,194,198,.55)';g.lineWidth=(opt.full?3.2:2.2)/zoom;g.beginPath();
  for(let k=-4;k<=4;k++){g.moveTo(k*S,-200);g.lineTo(k*S,200);g.moveTo(-200,k*S);g.lineTo(200,k*S)}g.stroke();
  g.fillStyle=opt.full?'#2f5a2c':'rgba(70,104,62,.97)';g.fillRect(PARK.x0+2,PARK.z0+2,PARK.x1-PARK.x0-4,PARK.z1-PARK.z0-4);
  g.fillStyle=opt.full?'#9a958c':'rgba(150,145,135,.9)';g.beginPath();seShape(PARK.rx+4.5,PARK.rz+4.5,48).forEach(([x,z],i)=>i?g.lineTo(x,z):g.moveTo(x,z));g.closePath();g.fill();
@@ -3993,9 +3993,9 @@ const BigMap={on:false,cx:0,cz:0,z:1,
   this.o.classList.add('on');$('#bmt').textContent=E.input.touch?'Tippen: Wegpunkt setzen · Ziehen: verschieben · Zwei Finger: zoomen':'Klicken: Wegpunkt setzen · Ziehen: verschieben · Mausrad: zoomen · M: schließen';this.draw()},
  close(){if(!this.on)return;this.on=false;this.o.classList.remove('on');UI.play()},
  draw(){const c=this.c,r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);c.width=r.width*dpr;c.height=r.height*dpr;const g=c.getContext('2d'),k=this.scale()*dpr,E=VX,P=E.player,pc=P.car||P;
-  g.setTransform(1,0,0,1,0,0);g.fillStyle='#0c1220';g.fillRect(0,0,c.width,c.height);
+  g.setTransform(1,0,0,1,0,0);g.fillStyle='#4f6378';g.fillRect(0,0,c.width,c.height);
   g.save();g.translate(c.width/2,c.height/2);g.scale(k,k);g.translate(-this.cx,-this.cz);
-  g.fillStyle='#141a2a';g.fillRect(-230,-230,460,460);drawCity(g,k,{full:1});
+  g.fillStyle='#8d9196';g.fillRect(-230,-230,460,460);drawCity(g,k,{full:1});
   /* Stadtteile */
   g.textAlign='center';g.textBaseline='middle';CITY.D.forEach(([n,x0,x1,z0,z1])=>{if(n=='Seepark')return;const fs=Math.max(7,13/Math.sqrt(this.z));g.font=`italic 800 ${fs}px 'Chakra Petch',system-ui,sans-serif`;g.fillStyle='rgba(255,255,255,.2)';
    g.fillText(n.toUpperCase(),(x0+x1)/2,(z0+z1)/2+(n=='Valoqis Plaza'?-12:0))});
@@ -5412,6 +5412,7 @@ const GTAUI={
 #map{width:clamp(170px,19vw,260px)!important;height:clamp(121px,13.5vw,185px)!important;left:calc(22px + var(--sal))!important;bottom:calc(20px + var(--sab))!important;border-radius:3px;filter:drop-shadow(0 2px 6px #000a)!important}
 body.touch #map{width:178px!important;height:128px!important;top:calc(10px + var(--sat))!important;bottom:auto!important;left:calc(10px + var(--sal))!important}
 #hpw,#zone{display:none!important}
+#bigmap .bm-bot button{background:#000000b8;border:0;border-radius:2px}.bm-top span{color:#fff!important;opacity:.85}
 #top button{background:#000000a8!important;border:0!important;border-radius:2px!important;font:600 13px var(--ui)!important;letter-spacing:.04em;box-shadow:none!important}#top button:hover{background:#000d!important}
 #clk{left:auto!important;right:calc(24px + var(--sar))!important;bottom:auto!important;top:calc(150px + var(--sat))!important;font:600 13px var(--ui)!important;opacity:.85}
 #cash{top:calc(104px + var(--sat))!important}
