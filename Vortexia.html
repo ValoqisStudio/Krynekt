@@ -3295,7 +3295,7 @@ class Engine{
   this.moon.color.setRGB(lerp(.55,1,d),lerp(.62,.95,d)-dk*.18,lerp(.85,.84,d)-dk*.38);const noon=1-.42*sstep(.4,.92,Clock.sun.y);this.moon.intensity=Z?.15:lerp(.62*nk,2.6*(1.15-cl*.55)*noon,d)+fl*2.5;
   this.hemi.color.setRGB(lerp(.36,.6+cl*.1,d),lerp(.38,.74+cl*.06,d),lerp(.6,.98,d));this.hemi.groundColor.setRGB(lerp(.14,.46,d),lerp(.1,.42,d),lerp(.07,.36,d));this.hemi.intensity=(Z?(Z.amb||.35):lerp(.55*nk,(1.55+cl*.3)*(.82+.18*noon),d))+fl*1.6;
   M.pool.opacity=.36*(1-d*.95);if(CARG.coneM)CARG.coneM.opacity=.32*(1-d*.85);if(this.decor.poolM)this.decor.poolM.opacity=.55*(1-d*.85);if(this.city.lampMat)this.city.lampMat.color.setRGB(1,.78,.5).multiplyScalar(lerp(2.4,.6,d));
-  const pu=this.post.mComp.uniforms;{const c=P.car,sp=c?Math.abs(c.vf):0;pu.uMB.value=damp(pu.uMB.value,c?clamp((sp-16)/28,0,.85):0,4,dt);pu.uLens.value=damp(pu.uLens.value,GU.uRain.value*(Z?0:1)*(c?.6:1)*(this.camR.pitch<-.2?.3:1),2,dt)}pu.uExp.value=lerp(.92,.8,d);if(!this.post.on)this.r.toneMappingExposure=lerp(.64,.5,d);if(this.q.bloom)pu.uBloom.value=lerp(.6,.44,d);this.post.mBright.uniforms.uTh.value=lerp(.72,1.2,d);
+  const pu=this.post.mComp.uniforms;{const c=P.car,sp=c?Math.abs(c.vf):0;pu.uMB.value=damp(pu.uMB.value,c?clamp((sp-16)/28,0,.85):0,4,dt);pu.uLens.value=damp(pu.uLens.value,GU.uRain.value*(Z?0:1)*(c?.6:1)*(this.camR.pitch<-.2?.3:1),2,dt)}pu.uExp.value=lerp(.92,.8,d);if(!this.post.on)this.r.toneMappingExposure=lerp(.64,.5,d);if(this.q.bloom)pu.uBloom.value=lerp(.6,.36,d);this.post.mBright.uniforms.uTh.value=lerp(.72,1.5,d);
   if(this.scene.fog){this.scene.fog.color.setRGB(lerp(.09,.66,d),lerp(.07,.75,d),lerp(.065,.88,d));this.scene.fog.density=this.set.fg*.0011*(this.fogK||1)*lerp(.9,.42,d)*(Z?.35:1)}this.r.setClearColor(d>.5?0x9ab4d8:0x06060a);
   GU.flash=fl;
   this.flashT-=dt;this.flashL.intensity=this.flashT>0?(this.flashBig?40*this.flashT/.35:9):0;this.flashL.distance=this.flashBig?40:9;
@@ -4513,7 +4513,7 @@ carGeos=function(t){t=t==null?0:t;if(CARGT[t])return CARGT[t];const T=CARTYPES[t
  if(!CARGT.shared){const s={rubber:mat(0x111214,0,.9,0),glassM:carGlass(),trimM:mat(0x0b0c0e,0,.5,.3),headM:glow(0xfff2dc,3.2),glowTex:rad('255,255,255',.8),coneTex:rad('255,240,210',.7),
    rimMs:[0,1,2].map(k=>{const x=rimTex(k);return new THREE.MeshStandardMaterial({map:x,emissiveMap:x,emissive:0x121316,roughness:.32,metalness:.35})}),
    aoM:new THREE.MeshBasicMaterial({map:aoTex(),color:0,transparent:true,opacity:.75,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),
-   plM:['7VTX 202','4LSC 774','8NEO 337','6OKV 058'].map(s=>new THREE.MeshStandardMaterial({map:plateTex(s),roughness:.45,metalness:.1,emissive:0x111111}))};
+   plM:['7VTX 202','4LSC 774','8NEO 337','6OKV 058'].map(s=>new THREE.MeshStandardMaterial({map:plateTex(s),roughness:.55,metalness:.05,color:0xb8bab4}))};
   s.rimM=s.rimMs[0];s.coneM=CARG.coneM=new THREE.MeshBasicMaterial({map:s.coneTex,color:0xfff0d8,transparent:true,opacity:.32,blending:THREE.AdditiveBlending,depthWrite:false,fog:false});CARGT.shared=s}
  Object.assign(G,CARGT.shared);return G};
 function carParts(){return CARD||(CARD={mir:new THREE.SphereGeometry(1,14,9),arm:B(.08,.028,.05),pl:new THREE.PlaneGeometry(.52,.114),wip:B(.56,.012,.022),exh:new THREE.CylinderGeometry(.034,.038,.13,12).rotateX(Math.PI/2),
