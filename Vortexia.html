@@ -1039,7 +1039,7 @@ class CityGenerator{
    const round=i%7==5;
    if(round){const r=Math.min(w,d)/2,g=new THREE.CylinderGeometry(r,r,h,40,1);_m4.makeTranslation(x,.3+h/2,z);bw.add(g,_m4,tn,0,seed,[TAU*r,h,TAU*r]);g.dispose();this.col.addBox(x-r*.92,x+r*.92,z-r*.92,z+r*.92)}
    let TF=null;if(!round){TF=this.tower(x,z,w,d,h,tn,seed,i,i%2==0);this.col.addBox(x-w/2,x+w/2,z-d/2,z+d/2)}
-   this.bld.push({x,z,w,d,t,i,seed,kind:i%3});const rr=Math.min(w,d)/2,X=TF?TF.x:x,Z=TF?TF.z:z,WW=TF?TF.w:w,DD=TF?TF.d:d;
+   this.bld.push({x,z,w,d,t,i,seed,kind:i%3,top:TF,h});const rr=Math.min(w,d)/2,X=TF?TF.x:x,Z=TF?TF.z:z,WW=TF?TF.w:w,DD=TF?TF.d:d;
    /* Sockelgeschoss (2 Etagen, breiter) mit Vordach-Kante */
    if(!round&&i%2==0){const pw=Math.min(w+1.8,26.5),pd=Math.min(d+1.8,26.5),tn2=FT[(i+1)%4];bw.box(x,.3+3.4,z,pw,6.8,pd,tn2,0,seed+.37);bw.box(x,7.25,z,pw+.6,.3,pd+.6,[.4,.39,.36],12);this.col.addBox(x-pw/2,x+pw/2,z-pd/2,z+pd/2)}
    /* Gesimse alle 7 Etagen */
@@ -5549,7 +5549,7 @@ const FireEsc={
  build(city){const L=[],M=new THREE.Matrix4(),R=new THREE.Matrix4(),T=new THREE.Matrix4();
   const box=(w,h,d,x,y,z,ry,ax,lx,ly,lz,rx)=>{const g=new THREE.BoxGeometry(w,h,d);if(rx)g.applyMatrix4(R.makeRotationX(rx));g.translate(lx,ly,lz);g.applyMatrix4(M.makeRotationY(ry).setPosition(x,y,z));L.push(g)};
   for(const b of city.bld){const fr=v=>v-Math.floor(v),ty=fr(b.seed*7.13+.31),fk=ty<.34?0:ty<.67?1:2;
-   if(b.i%7==5||b.i%2==0||!(fk==2||fk==1&&fr(b.seed*11.37+.17)<.5))continue;
+   const pv=fr(b.seed*11.37+.17);if(b.i%7==5||b.i%2==0||fk==2&&pv<.35||!(fk==2||fk==1&&pv<.5))continue;
    const sideX=b.i%4==1,ry=sideX?Math.PI/2:0,fx=sideX?b.x+b.w/2:b.x,fz=sideX?b.z:b.z+b.d/2,len=Math.min(sideX?b.d:b.w,22)*.42,top=Math.min(b.t*.62,26);
    const W=Math.max(4.2,Math.min(6.5,len)),off=(Math.sin(b.seed*91.7)*.5)*((sideX?b.d:b.w)*.3);
    for(let y=4.6,k=0;y<top;y+=3.3,k++){
@@ -5564,6 +5564,25 @@ const FireEsc={
    for(let y=2.1;y<4.5;y+=.35)box(.5,.03,.03,fx,y,fz,ry,0,off+W/2-.72,0,1.1)}
   if(!L.length)return;const m=new THREE.Mesh(mergeGeos(L),new THREE.MeshStandardMaterial({color:0x2b2d31,roughness:.6,metalness:.55}));m.castShadow=true;m.receiveShadow=true;city.sc.add(m);this.mesh=m;this.n=L.length}};
 {const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);try{FireEsc.build(this)}catch(x){console.warn('Feuertreppen',x)}}}
+/* ===== Dächer wie in Los Santos: Klimaanlagen, Lüftungsrohre, Antennen, Satellitenschüsseln auf der obersten Dachstufe (ein Mesh) ===== */
+const Roofs={
+ build(city){const L=[],M=new THREE.Matrix4(),add=(g,x,y,z,ry)=>{g.applyMatrix4(M.makeRotationY(ry||0).setPosition(x,y,z));L.push(g)};
+  for(const b of city.bld){const T=b.top;if(!T||T.heli||b.h==null)continue;const y=.3+b.h,R=_trnd(9100+b.i*13),r=(a,c)=>a+R()*(c-a),hw=T.w/2-1.6,hd=T.d/2-1.6;if(hw<1||hd<1)continue;
+   if(b.i%3==2)continue;/* Pyramidendach */
+   const tank=T.kind==2&&T.w>=12&&T.d>=12&&b.i%3!=1,tx=T.x+T.w*.24*(b.i%2?1:-1),tz=T.z-T.d*.22,
+    free=(x,z,rad)=>(!tank||Math.hypot(x-tx,z-tz)>2.6+rad)&&(b.i%3!=1||Math.abs(x-T.x)>T.w*.3+rad+.3||Math.abs(z-T.z)>T.d*.3+rad+.3)&&(b.i%3!=0||Math.hypot(x-T.x,z-T.z)>1+rad);
+   const n=3+((R()*6)|0);
+   for(let k=0;k<n;k++){const x=T.x+r(-hw,hw),z=T.z+r(-hd,hd);if(!free(x,z,1))continue;const ry=R()<.5?0:Math.PI/2;
+    add(new THREE.BoxGeometry(1.5,.9,1.1).translate(0,.45,0),x,y,z,ry);add(new THREE.CylinderGeometry(.38,.38,.06,12).translate(0,.93,0),x,y,z,ry)}
+   for(let k=0;k<2+((R()*3)|0);k++){const x=T.x+r(-hw,hw),z=T.z+r(-hd,hd);if(!free(x,z,.5))continue;add(new THREE.CylinderGeometry(.14,.14,r(.8,1.6),8).translate(0,.6,0),x,y,z);
+    add(new THREE.CylinderGeometry(.24,.18,.22,8).translate(0,1.3,0),x,y,z)}
+   if(R()<.6){const x=T.x+r(-hw,hw)*.6,z=T.z+r(-hd,hd)*.6,ah=r(3.5,8);if(free(x,z,.3)){add(new THREE.CylinderGeometry(.05,.07,ah,6).translate(0,ah/2,0),x,y,z);
+    for(let q=1;q<4;q++)add(new THREE.BoxGeometry(.9-q*.18,.03,.03).translate(0,ah*q/4,0),x,y,z,R()*TAU)}}
+   if(R()<.45){const x=T.x+r(-hw,hw),z=T.z+r(-hd,hd);if(free(x,z,.6)){const g=new THREE.SphereGeometry(.6,12,6,0,TAU,0,Math.PI*.35);g.rotateX(-.9);add(g.translate(0,.9,0),x,y,z,R()*TAU);
+    add(new THREE.CylinderGeometry(.04,.04,.9,6).translate(0,.45,0),x,y,z)}}}
+  if(!L.length)return;const m=new THREE.Mesh(mergeGeos(L.map(g=>g.index?g.toNonIndexed():g)),new THREE.MeshStandardMaterial({color:0xaeb0b2,roughness:.8,metalness:.05}));
+  m.castShadow=true;m.receiveShadow=true;city.sc.add(m);this.mesh=m;this.n=L.length}};
+{const cb=CityGenerator.prototype.build;CityGenerator.prototype.build=function(){cb.call(this);try{Roofs.build(this)}catch(x){console.warn('Dächer',x)}}}
 /* ===== Hauptmenü wie GTA V: die drei Hauptfiguren als schräg gestellte Artwork-Paneele (aus dem Spiel gerendert, Comic-Kontrast, Figurenfarben) ===== */
 const Trio={done:false,
  css:`#trio{position:fixed;z-index:9;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));display:none;gap:12px;pointer-events:none}
