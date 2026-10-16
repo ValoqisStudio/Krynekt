@@ -704,7 +704,7 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  vec2 q=p.xz,gd=q-floor(q/S_+.5)*S_;               /* Abstand zur nächsten Straßenmitte (x / z) */
  float ax=abs(gd.x),az=abs(gd.y);
  bool vroad=ax<R_*.5,hroad=az<R_*.5;
- vec3 base=vec3(.13,.13,.135)*(.82+.36*fbm(q*.9))*(1.+.25*smoothstep(.4,.8,fbm(q*.05+11.)));
+ vec3 base=vec3(.175,.168,.158)*(.82+.36*fbm(q*.9))*(1.+.25*smoothstep(.4,.8,fbm(q*.05+11.)));
  base*=1.-.35*smoothstep(.55,.9,fbm(q*.12+3.));        /* Ölflecken */
  float crack=smoothstep(.012,0.,abs(fbm(q*.7)-.5)-.002)*.22*smoothstep(.45,.6,vn(q*.08+5.));base*=1.-crack;
  /* Reifenspuren je Fahrspur (dunkler, glatter), Rinnstein mit Schmutz, Flickstellen, Splitt aus der Nähe */
@@ -722,11 +722,11 @@ void groundMat(vec3 p,vec3 V,inout vec3 alb,inout vec3 em,inout float ro,inout f
  vec3 mark=vec3(0.);float mk=0.;
  /* senkrechte Straße (läuft entlang z) */
  if(vroad&&az>R_*.5+.5){
-  mk+=step(ax,.25)*step(mod(q.y,6.),3.);mark=vec3(.91,.72,.14);
+  mk+=step(abs(ax-.2),.075);mark=vec3(.93,.74,.16);
   float e=step(abs(ax-6.1),.2);if(e>0.){mk=max(mk,e);mark=mix(mark,vec3(.85,.87,.92),e);}
  }
  if(hroad&&ax>R_*.5+.5){
-  float c1=step(az,.25)*step(mod(q.x,6.),3.);float e=step(abs(az-6.1),.2);
+  float c1=step(abs(az-.2),.075);float e=step(abs(az-6.1),.2);
   if(c1>0.){mk=max(mk,c1);mark=vec3(.91,.72,.14);}
   if(e>0.){mk=max(mk,e);mark=vec3(.85,.87,.92);}
  }
