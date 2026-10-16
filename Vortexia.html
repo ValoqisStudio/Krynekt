@@ -865,7 +865,7 @@ vec3 sunFlare(vec2 uv){if(uSunS.z<=0.)return vec3(0.);vec2 sp=uSunS.xy,px=1./uRe
  float asp=uRes.x/uRes.y;vec2 dv=(uv-sp)*vec2(asp,1.);float d=length(dv),an=atan(dv.y,dv.x);
  vec3 c=vec3(1.,.86,.62)*(exp(-d*7.)*.32+exp(-d*28.)*.7);c+=vec3(1.,.9,.75)*pow(max(0.,cos(an*6.+.4)),40.)*exp(-d*5.)*.18;
  vec2 ax=vec2(.5)-sp;for(int i=1;i<=5;i++){float k=float(i)*.42-.2;vec2 gp=sp+ax*k*2.;float gd=length((uv-gp)*vec2(asp,1.)),r=.012+.022*fract(float(i)*.37);
-  c+=mix(vec3(.35,.7,.45),vec3(.9,.55,.3),fract(float(i)*.61))*smoothstep(r,r*.55,gd)*.09;}
+  c+=mix(vec3(.35,.7,.45),vec3(.9,.55,.3),fract(float(i)*.61))*smoothstep(r,r*.55,gd)*.15;}
  c+=vec3(.5,.35,.2)*smoothstep(.02,0.,abs(length((uv-sp-ax*1.1)*vec2(asp,1.))-.16))*.05;
  return c*vis*uDay;}
 vec3 S(vec2 p){return texture2D(tScene,p).rgb;}
@@ -923,8 +923,9 @@ void main(){
   vec3 ray=(uCamWorld*vec4(v.xyz,1.)).xyz-uCam;float dist=length(ray);vec3 rd=ray/max(dist,1e-4);
   if(d>.99999)dist=uMaxD;
   col=volumetric(col,uCam,rd,dist,gl_FragCoord.xy);}
- {float dz=texture2D(tDepth,uv).x;float dd=linD(dz);float hz=(1.-exp(-max(dd-12.,0.)*.0042))*uDay*.62*step(dz,.99999);
-  col=mix(col,vec3(1.02,.94,.8)*1.15,hz);}
+ {float dz=texture2D(tDepth,uv).x;if(dz<.99999){float dd=linD(dz);vec4 hv=uInvProj*vec4(uv*2.-1.,dz*2.-1.,1.);hv/=hv.w;vec3 hrd=normalize((uCamWorld*vec4(hv.xyz,1.)).xyz-uCam);
+  float sd=pow(max(dot(hrd,SUN),0.),3.),hz=(1.-exp(-max(dd-15.,0.)*.0028))*uDay*mix(.4,.58,sd);
+  col=mix(col,mix(vec3(.66,.76,.9),vec3(1.08,.93,.72)*1.15,sd),hz);}}
  col=tonemap(col);
  vec3 nC=col;{float l=dot(nC,vec3(.299,.587,.114));nC=mix(vec3(l),nC,1.18);nC=mix(nC*vec3(.94,1.,1.1)+vec3(.004,.006,.014),nC*vec3(1.12,.98,.86),smoothstep(.1,.7,l))*1.12;}
  vec3 dC=col;{float l=dot(dC,vec3(.2126,.7152,.0722));dC=mix(vec3(l),dC,1.32);dC*=mix(vec3(.9,.99,1.09),vec3(1.09,1.,.85),smoothstep(.05,.72,l));
