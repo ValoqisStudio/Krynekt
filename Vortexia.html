@@ -4486,9 +4486,10 @@ function rimTex(k){const c=document.createElement('canvas');c.width=c.height=256
  g.fillStyle='#16171a';g.beginPath();g.arc(C,C,11,0,TAU);g.fill();g.fillStyle='#19e6ff';g.beginPath();g.arc(C,C,5,0,TAU);g.fill();
  const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t}
 function plateTex(txt){const c=document.createElement('canvas');c.width=256;c.height=56;const g=c.getContext('2d');
- g.fillStyle='#f4f5f2';g.fillRect(0,0,256,56);g.strokeStyle='#111';g.lineWidth=4;g.strokeRect(2,2,252,52);g.fillStyle='#1d3fa8';g.fillRect(4,4,28,48);
- g.fillStyle='#ffd23c';for(let i=0;i<8;i++){const a=i*TAU/8;g.beginPath();g.arc(18+Math.cos(a)*7,18+Math.sin(a)*7,1.4,0,TAU);g.fill()}g.fillStyle='#fff';g.font='bold 15px Arial';g.textAlign='center';g.fillText('D',18,46);
- g.fillStyle='#111';g.font='bold 34px "Arial Narrow",Arial,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,146,30);
+ /* amerikanisches Kennzeichen im Stil von San Andreas: weiß, roter Schriftzug „Vortex City“ oben, blaue Nummer */
+ g.fillStyle='#f4f5f2';g.fillRect(0,0,256,56);g.strokeStyle='#1c2c5a';g.lineWidth=4;g.strokeRect(2,2,252,52);
+ g.textAlign='center';g.fillStyle='#b8202a';g.font='italic bold 14px Georgia,serif';g.textBaseline='alphabetic';g.fillText('Vortex City',128,16);
+ g.fillStyle='#1c2c5a';g.font='bold 32px "Arial Narrow",Arial,sans-serif';g.textBaseline='middle';g.fillText(txt,128,36);
  const t=new THREE.CanvasTexture(c);return t}
 function aoTex(){const c=document.createElement('canvas');c.width=64;c.height=128;const g=c.getContext('2d');g.setTransform(1,0,0,2,0,0);
  const r=g.createRadialGradient(32,32,4,32,32,32);r.addColorStop(0,'rgba(0,0,0,.85)');r.addColorStop(.55,'rgba(0,0,0,.6)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)}
@@ -4512,7 +4513,7 @@ carGeos=function(t){t=t==null?0:t;if(CARGT[t])return CARGT[t];const T=CARTYPES[t
  if(!CARGT.shared){const s={rubber:mat(0x111214,0,.9,0),glassM:carGlass(),trimM:mat(0x0b0c0e,0,.5,.3),headM:glow(0xfff2dc,3.2),glowTex:rad('255,255,255',.8),coneTex:rad('255,240,210',.7),
    rimMs:[0,1,2].map(k=>{const x=rimTex(k);return new THREE.MeshStandardMaterial({map:x,emissiveMap:x,emissive:0x121316,roughness:.32,metalness:.35})}),
    aoM:new THREE.MeshBasicMaterial({map:aoTex(),color:0,transparent:true,opacity:.75,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),
-   plM:['VC·VX 2026','VC·AL 774','VC·NE 1337','VC·OK 58'].map(s=>new THREE.MeshStandardMaterial({map:plateTex(s),roughness:.45,metalness:.1,emissive:0x111111}))};
+   plM:['7VTX 202','4LSC 774','8NEO 337','6OKV 058'].map(s=>new THREE.MeshStandardMaterial({map:plateTex(s),roughness:.45,metalness:.1,emissive:0x111111}))};
   s.rimM=s.rimMs[0];s.coneM=CARG.coneM=new THREE.MeshBasicMaterial({map:s.coneTex,color:0xfff0d8,transparent:true,opacity:.32,blending:THREE.AdditiveBlending,depthWrite:false,fog:false});CARGT.shared=s}
  Object.assign(G,CARGT.shared);return G};
 function carParts(){return CARD||(CARD={mir:new THREE.SphereGeometry(1,14,9),arm:B(.08,.028,.05),pl:new THREE.PlaneGeometry(.52,.114),wip:B(.56,.012,.022),exh:new THREE.CylinderGeometry(.034,.038,.13,12).rotateX(Math.PI/2),
