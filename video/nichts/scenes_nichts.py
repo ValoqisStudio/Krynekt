@@ -56,8 +56,8 @@ def s2_percent(c, lt, p, t, dur):
     v = 99.9999 * ease_out((lt - 0.6) / 2.6)
     if lt > 0.6:
         blit(c.img, txt(counter_text(v), 120, (255, 226, 26), 12, (0, 0, 0), F_BLACK, True), 540, 1020)
-    if lt > 3.3:
-        sticker(c, "LEER", 540, 1145, 92, (255, 255, 255), 12, (0, 0, 0), rot=4, scale=back_out((lt - 3.3) / 0.25))
+    if lt > 5.6:
+        sticker(c, "LEER", 540, 1145, 92, (255, 255, 255), 12, (0, 0, 0), rot=4, scale=back_out((lt - 5.6) / 0.25))
     hud(c, "ATOM", lt)
     return cam
 
@@ -100,15 +100,15 @@ def draw_stadium(c, cx, cy, z, t):
 
 def s2_stadium(c, lt, p, t, dur):
     cam = dict(scale=1.0, cx=540, cy=760, shake=0.0, desat=0.0)
-    z = 1.0 if lt < 4.0 else 1.0 + 24 * ease((lt - 4.0) / 2.2) ** 2
+    z = 25.0 if lt < 4.4 else 1.0 + 24 * (1 - ease((lt - 4.4) / 2.0)) ** 2
     draw_stadium(c, 540, 760, min(z, 25), t)
-    if lt > 0.3 and lt < 4.2:
-        sticker(c, "KERN = ERBSE", 540, 230, 70, (130, 255, 110), 11, (0, 0, 0), rot=-3, scale=back_out((lt - 0.3) / 0.25))
-        c.arrow(540, 300, 540, 720, (0.5, 1.0, 0.4), 6)
-    if 2.6 < lt < 4.3:
-        sticker(c, "ATOM = STADION", 540, 1170, 72, (255, 255, 255), 11, (0, 0, 0), rot=3, scale=back_out((lt - 2.6) / 0.25))
-    if lt > 5.4:
-        blit(c.img, emoji("\U0001FADB", 120), 700, 600, ease((lt - 5.4) * 3))
+    if 1.5 < lt < 4.5:
+        sticker(c, "KERN = ERBSE", 540, 300, 76, (130, 255, 110), 11, (0, 0, 0), rot=-3, scale=back_out((lt - 1.5) / 0.25))
+        c.arrow(540, 370, 540, 700, (0.5, 1.0, 0.4), 7)
+    if lt > 6.6:
+        sticker(c, "ATOM = STADION", 540, 1210, 72, (255, 255, 255), 11, (0, 0, 0), rot=3, scale=back_out((lt - 6.6) / 0.25))
+    if 3.3 < lt < 4.6:
+        blit(c.img, emoji("\U0001FADB", 130), 720, 620, ease((lt - 3.3) * 3))
     return cam
 
 
@@ -120,8 +120,8 @@ def s2_nothing(c, lt, p, t, dur):
         x, y = rng.uniform(0, W), rng.uniform(200, 1300)
         a = max(0.0, 1 - lt * 0.8) * rng.uniform(0.2, 0.6)
         c.circle(x, y, 2, CYAN * a, -1)
-    if lt > 0.9:
-        k = lt - 0.9
+    if lt > 1.5:
+        k = lt - 1.5
         flick = 1.0 if (int(k * 20) % 7) else 0.35
         gx = int(8 * math.sin(k * 50)) if k < 0.35 else 0
         a = min(1.0, k * 4) * flick
@@ -194,7 +194,7 @@ def draw_cube(c, cx, cy, s, glow=1.0):
 
 def s2_cube(c, lt, p, t, dur):
     cam = dict(scale=1.0 + 0.06 * p, cx=540, cy=760, shake=0.0, desat=0.0)
-    reveal = 1.7
+    reveal = 2.3
     if lt < reveal:
         pul = 0.6 + 0.4 * math.sin(lt * 9)
         blit(c.glow, blob(90, (1, 1, 1), 2), 540, 760, pul, add=True)

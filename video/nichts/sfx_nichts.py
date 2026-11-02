@@ -45,9 +45,10 @@ def riser(d):
 for b in sc[1:]:
     w = whoosh(); put(w, b - 0.3, 0.8, 1.0)
 put(impact(), sc[0] + 1.3)
+put(whoosh(0.9) * 0.8, sc[2] + 4.3)
 put(riser(max(0.5, sc[5] - sc[4] - 1.2)), sc[4] + 1.0)
 put(impact() * 0.9, sc[5] - 0.15)
-put(impact() * 0.8, sc[5] + 1.7)
+put(impact() * 0.8, sc[5] + 2.3)
 put(impact(), sc[6] + 0.45)
 put(ding(), sc[7] + 1.0)
 put(impact() * 0.7, sc[8])
@@ -64,7 +65,7 @@ for w in tm["words"]:
 def crackle(d=0.5):
     k = int(d * SR); x = (rng.random(k) > 0.993) * rng.normal(0, 1, k)
     return lp(x, np.full(k, 0.6)) * np.exp(-np.arange(k) / SR * 5) * 3
-put(crackle(), sc[0] + 1.3); put(crackle(), sc[5] + 1.7); put(crackle(), sc[6] + 0.45)
+put(crackle(), sc[0] + 1.3); put(crackle(), sc[5] + 2.3); put(crackle(), sc[6] + 0.45)
 # ambient pad (A minor-ish), very quiet
 tt = np.arange(n) / SR
 pad = np.zeros(n)
