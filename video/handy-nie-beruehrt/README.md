@@ -13,3 +13,13 @@ Mit echter Stimme: Wort-Timings aus der Transkription in `timing.json` schreiben
 - Rendern: `python3 sfx.py timing_v3.json sfx_v3.wav && python3 render2.py timing_v3.json v3_bild.mp4 sfx_v3.wav`
 - Stimme draufmischen:
   `ffmpeg -i v3_bild.mp4 -i voice.mp3 -filter_complex "[1:a]volume=1.0[v];[0:a]volume=0.45[s];[v][s]amix=inputs=2:duration=longest:normalize=0[a]" -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 192k v3_final.mp4`
+
+## Version 4 (final)
+- `render4.py`: + Hook-Titel, Emoji-Pops, Funken bei Impacts, Light-Leaks, Handkamera-Look
+- `sfx4.py`: + Pop-Sounds, Funken-Knistern
+- `mix.sh video.mp4 voice.mp3 out.mp4`: Stimme EQ/Kompressor, Sidechain-Ducking, Loudness -14 LUFS
+```
+python3 sfx4.py timing_v3.json sfx_v4.wav
+python3 render4.py timing_v3.json v4_bild.mp4 sfx_v4.wav
+bash mix.sh v4_bild.mp4 voice.mp3 version4.mp4
+```
