@@ -614,7 +614,24 @@ def s_cta(c, lt, p, t, dur):
     return cam
 
 
-SCENES = [s_hook, s_atoms, s_repel, s_contact, s_force, s_hover, s_cta]
+def s_end(c, lt, p, t, dur):
+    cam = dict(scale=1.0 + 0.03 * p, cx=540, cy=800, shake=0.0, desat=0.0)
+    s = back_out(lt / 0.5, 1.3)
+    atom(c, 540, 640, 300 * s, t)
+    if lt > 0.25:
+        k = back_out((lt - 0.25) / 0.3)
+        sticker(c, "UNSICHTBAR", 540, 1060, 120, (255, 255, 255), 12, (0, 0, 0), scale=k)
+    if lt > 0.4:
+        k = back_out((lt - 0.4) / 0.3)
+        sticker(c, "ERKLÄRT", 540, 1190, 120, (255, 226, 26), 12, (0, 0, 0), scale=k)
+    if lt > 0.8:
+        a = ease((lt - 0.8) * 3)
+        blit(c.img, txt("Folgen für mehr", 56, (220, 230, 255), 8, (0, 0, 0), F_BLACK, True), 500, 1330, a)
+        blit(c.img, emoji("\U0001F92F", 80), 790, 1325, a)
+    return cam
+
+
+SCENES = [s_hook, s_atoms, s_repel, s_contact, s_force, s_hover, s_cta, s_end]
 
 
 # ------------------------------------------------------------------ captions
@@ -674,6 +691,8 @@ def captions(img, t):
             return
 
 
+WM = txt("@unsichtbar.erklaert", 36, (255, 255, 255), 4, (0, 0, 0), F_BOLD)
+
 # ------------------------------------------------------------------ frame
 def scene_at(t):
     si = 0
@@ -725,6 +744,8 @@ def frame(i):
             img = cv2.blur(img, (1, ks))
             img = img + k * k * 0.25
     captions(img, t)
+    if t < SC[-2]:
+        blit(img, WM, W - 40 - WM.shape[1] / 2 + 20, 1700, 0.55)
     img *= VIGN
     g = cv2.resize(GRAIN[i % 6], (W, H), interpolation=cv2.INTER_NEAREST)[..., None]
     img += g * 0.022

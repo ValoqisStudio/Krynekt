@@ -48,6 +48,8 @@ put(impact(), sc[0] + 1.25)             # hook freeze
 put(riser(1.2), sc[2] + 0.15)
 put(impact() * 0.8, sc[2] + 1.35)       # electrons collide
 put(ding(), sc[6] + 1.0)
+put(impact() * 0.7, sc[7])
+put(ding() * 1.2, sc[7] + 0.45)
 # ambient pad (A minor-ish), very quiet
 tt = np.arange(n) / SR
 pad = np.zeros(n)
