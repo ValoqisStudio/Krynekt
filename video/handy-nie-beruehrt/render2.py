@@ -117,7 +117,7 @@ def blob(r, col, k=3.0):
     s = int(r * 2)
     y, x = np.mgrid[0:s, 0:s].astype(np.float32)
     d2 = ((x - s / 2) ** 2 + (y - s / 2) ** 2) / (r * r)
-    a = np.exp(-d2 * k)
+    a = np.clip((np.exp(-d2 * k) - math.exp(-k)) / (1 - math.exp(-k)), 0, 1)
     return np.dstack([np.ones((s, s, 3), np.float32) * np.array(col, np.float32), a]).astype(np.float32)
 
 
