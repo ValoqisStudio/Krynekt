@@ -28,9 +28,10 @@ _ice = np.clip((_lat - 0.84) * 20, 0, 1)[..., None]
 EARTH_TEX = (EARTH_TEX * (1 - _ice) + np.array([0.92, 0.95, 1.0]) * _ice).astype(np.float32)
 CLOUDS = np.clip((_fbm(1024, 2048, 99, 8) - 0.52) * 3.2, 0, 1).astype(np.float32)
 SUN_TEX = _fbm(512, 1024, 5, 8) ** 1.4
+CITY = (np.clip((_fbm(1024, 2048, 13, 8) - 0.6) * 6, 0, 1) * _lm[..., 0] * (1 - _ice[..., 0])).astype(np.float32)
 
 
-def render_globe(R, rot, light, tex, clouds=None, emissive=False, night=0.0, tint=None):
+def render_globe(R, rot, light, tex, clouds=None, emissive=False, night=0.0, tint=None, city=None):
     """returns RGBA sprite of a textured sphere. light = (lx, ly) direction toward light in screen plane, None = unlit"""
     s = int(R * 2 + 4)
     y, x = np.mgrid[0:s, 0:s].astype(np.float32)
@@ -58,11 +59,34 @@ def render_globe(R, rot, light, tex, clouds=None, emissive=False, night=0.0, tin
         col = col * (0.03 + 1.05 * diff ** 0.8)[..., None]
         rim = np.clip((1 - z) ** 3, 0, 1) * np.clip(diff * 2, 0, 1)
         col = col + rim[..., None] * np.array([0.3, 0.6, 1.0]) * 0.9
+        if city is not None:
+            ct = city[vi, ui][..., None]
+            col = col + ct * np.clip(1 - diff * 4, 0, 1)[..., None] * np.array([1.0, 0.72, 0.35]) * 1.3
     if night > 0:
         col = col * (1 - night)
     if tint is not None:
         col = col * np.array(tint, np.float32)
     return np.dstack([np.clip(col, 0, 1.5), a]).astype(np.float32)
+
+
+_fl = np.exp(-((np.linspace(-1, 1, 1400)[None, :] / 0.45) ** 2)) * np.exp(-((np.linspace(-1, 1, 60)[:, None] / 0.25) ** 2))
+FLARE = np.dstack([np.ones((60, 1400, 3), np.float32) * np.array([0.45, 0.65, 1.0], np.float32), _fl.astype(np.float32)])
+
+# ---- space background (nebula + stars) replaces bokeh
+_nh, _nw = (H * 2) // 4, W // 4
+_n1, _n2 = _fbm(_nh, _nw, 31, 6), _fbm(_nh, _nw, 32, 6)
+_neb = (np.array([0.32, 0.08, 0.45]) * (_n1 ** 3)[..., None] + np.array([0.05, 0.18, 0.42]) * (_n2 ** 3)[..., None] + np.array([0.5, 0.1, 0.25]) * ((_n1 * _n2) ** 4)[..., None]) * 0.55
+BOKEH = cv2.resize(_neb.astype(np.float32), (W, H * 2), interpolation=cv2.INTER_CUBIC)
+_sr = np.random.default_rng(8)
+for _ in range(1100):
+    x, y, b = int(_sr.uniform(0, W)), int(_sr.uniform(0, H * 2)), _sr.uniform(0.15, 0.8) ** 2
+    cv2.circle(BOKEH, (x, y), 1 if b < 0.3 else 2, (b, b, b * 1.1), -1, cv2.LINE_AA)
+for _ in range(22):
+    x, y = int(_sr.uniform(0, W)), int(_sr.uniform(0, H * 2))
+    L = int(_sr.uniform(14, 34))
+    cv2.line(BOKEH, (x - L, y), (x + L, y), (0.5, 0.55, 0.7), 1, cv2.LINE_AA)
+    cv2.line(BOKEH, (x, y - L), (x, y + L), (0.5, 0.55, 0.7), 1, cv2.LINE_AA)
+    cv2.circle(BOKEH, (x, y), 3, (1, 1, 1), -1, cv2.LINE_AA)
 
 
 def draw_sun(c, cx, cy, R, t, op=1.0):
@@ -72,12 +96,29 @@ def draw_sun(c, cx, cy, R, t, op=1.0):
     spr = render_globe(R, t * 0.03, None, tex, emissive=True)
     blit(c.glow, blob(int(R * 2.6), (1.0, 0.55, 0.12), 1.6), cx, cy, 0.6 * op, add=True)
     blit(c.img, blob(int(R * 1.6), (1.0, 0.5, 0.1), 2.4), cx, cy, 0.45 * op, add=True)
+    for i in range(28):
+        a = i / 28 * 2 * math.pi + t * 0.05
+        L = R * (1.25 + 0.25 * math.sin(t * 1.3 + i * 2.1))
+        c.line([(cx + R * 1.02 * math.cos(a), cy + R * 1.02 * math.sin(a)), (cx + L * math.cos(a), cy + L * math.sin(a))], np.array([1.0, 0.55, 0.15]) * 0.18 * op, max(2, int(R * 0.02)))
     blit(c.img, spr, cx, cy, op)
     blit(c.glow, spr, cx, cy, 0.22 * op, add=True)
+    for k in range(4):
+        a0 = k * 1.7 + 0.4 + 0.05 * math.sin(t + k)
+        h = R * (0.18 + 0.08 * math.sin(t * 0.9 + k * 3))
+        pts = []
+        for j in range(25):
+            u = j / 24
+            aa = a0 + (u - 0.5) * 0.35
+            rr = R * 0.99 + h * math.sin(u * math.pi)
+            pts.append((cx + rr * math.cos(aa), cy + rr * math.sin(aa)))
+        c.line(pts, np.array([1.0, 0.45, 0.1]) * 0.9 * op, max(2, int(R * 0.035)))
+    blit(c.glow, FLARE, cx, cy, 0.55 * op * min(1, R / 150), add=True)
 
 
 def draw_earth(c, cx, cy, R, t, light=(-1.0, 0.0), night=0.0, frost=0.0):
-    spr = render_globe(R, t * 0.02, light, EARTH_TEX, CLOUDS, night=night)
+    spr = render_globe(R, t * 0.02, light, EARTH_TEX, CLOUDS, night=night * 0.6, city=CITY if R > 60 else None)
+    if night > 0:
+        spr[..., :3] *= (1 - night * 0.35)
     if frost > 0:
         g = spr[..., :3].mean(axis=2, keepdims=True)
         spr[..., :3] = spr[..., :3] * (1 - frost) + (g * np.array([0.8, 0.9, 1.1]) + 0.15 * frost) * frost
@@ -235,6 +276,110 @@ def s3_cta(c, lt, p, t, dur):
             blit(c.img, emoji("\U0001F525", 56), 240 + txt(full, 50, font=F_BOLD).shape[1] - 10, y, k)
         blit(c.img, emoji("\U0001F447", 120), 540, y + 150 + 18 * math.sin(lt * 8), k)
     return cam
+
+
+
+@lru_cache(maxsize=256)
+def mascot_face(R, mood, blink, lx, ly):
+    ss = 4
+    S = int(R * 2.2) * ss
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c0 = S / 2
+    r = R * ss
+    def E(x, y, rx, ry, fill):
+        d.ellipse([c0 + x - rx, c0 + y - ry, c0 + x + rx, c0 + y + ry], fill=fill)
+    ex, ey = 0.34 * r, -0.12 * r
+    big = 1.3 if mood in ("shock", "scared") else 1.0
+    if mood == "cool":
+        for sg in (-1, 1):
+            d.rounded_rectangle([c0 + sg * ex - 0.3 * r, c0 + ey - 0.17 * r, c0 + sg * ex + 0.3 * r, c0 + ey + 0.2 * r], radius=0.1 * r, fill=(10, 10, 15, 255))
+            d.ellipse([c0 + sg * ex - 0.18 * r, c0 + ey - 0.1 * r, c0 + sg * ex - 0.05 * r, c0 + ey - 0.0 * r], fill=(255, 255, 255, 120))
+        d.line([c0 - ex + 0.28 * r, c0 + ey - 0.05 * r, c0 + ex - 0.28 * r, c0 + ey - 0.05 * r], fill=(10, 10, 15, 255), width=int(0.06 * r))
+    elif mood == "happy" or blink:
+        for sg in (-1, 1):
+            d.arc([c0 + sg * ex - 0.17 * r, c0 + ey - 0.14 * r, c0 + sg * ex + 0.17 * r, c0 + ey + 0.16 * r], 200, 340, fill=(15, 15, 25, 255), width=int(0.07 * r))
+    else:
+        for sg in (-1, 1):
+            E(sg * ex, ey, 0.17 * r * big, 0.21 * r * big, (255, 255, 255, 255))
+            pr = 0.09 * r * (0.75 if mood in ("shock", "scared") else 1.0)
+            px, py = sg * ex + lx * 0.06 * r, ey + ly * 0.07 * r
+            E(px, py, pr, pr, (15, 15, 25, 255))
+            E(px - pr * 0.35, py - pr * 0.4, pr * 0.32, pr * 0.32, (255, 255, 255, 255))
+    # brows
+    bw = int(0.06 * r)
+    brow = {"shock": (-0.42, -0.42, 0), "scared": (-0.40, -0.46, 1), "worried": (-0.36, -0.42, 1), "think": (-0.36, -0.46, 2), "cold": (-0.38, -0.40, 1)}
+    if mood in brow:
+        y1, y2, kind = brow[mood]
+        for sg in (-1, 1):
+            if kind == 1:
+                d.line([c0 + sg * (ex + 0.15 * r), c0 + y1 * r, c0 + sg * (ex - 0.15 * r), c0 + y2 * r], fill=(15, 15, 25, 255), width=bw)
+            elif kind == 2 and sg == 1:
+                d.arc([c0 + ex - 0.17 * r, c0 + y2 * r, c0 + ex + 0.17 * r, c0 + y2 * r + 0.2 * r], 200, 340, fill=(15, 15, 25, 255), width=bw)
+            elif kind == 2:
+                d.line([c0 - ex - 0.15 * r, c0 + y1 * r, c0 - ex + 0.15 * r, c0 + y1 * r], fill=(15, 15, 25, 255), width=bw)
+            else:
+                d.arc([c0 + sg * ex - 0.17 * r, c0 + y1 * r, c0 + sg * ex + 0.17 * r, c0 + y1 * r + 0.2 * r], 200, 340, fill=(15, 15, 25, 255), width=bw)
+    # mouth
+    my = 0.32 * r
+    dark = (20, 10, 20, 255)
+    if mood == "shock":
+        E(0, my, 0.12 * r, 0.16 * r, dark)
+    elif mood == "happy":
+        d.chord([c0 - 0.28 * r, c0 + my - 0.25 * r, c0 + 0.28 * r, c0 + my + 0.2 * r], 0, 180, fill=dark)
+        E(0, my + 0.1 * r, 0.11 * r, 0.06 * r, (240, 90, 110, 255))
+    elif mood == "cool":
+        d.arc([c0 - 0.22 * r, c0 + my - 0.2 * r, c0 + 0.12 * r, c0 + my + 0.08 * r], 20, 150, fill=dark, width=bw)
+    elif mood == "cold":
+        d.rounded_rectangle([c0 - 0.24 * r, c0 + my - 0.08 * r, c0 + 0.24 * r, c0 + my + 0.1 * r], radius=0.05 * r, fill=(250, 250, 250, 255), outline=dark, width=int(0.03 * r))
+        for k in range(1, 4):
+            xx = c0 - 0.24 * r + k * 0.12 * r
+            d.line([xx, c0 + my - 0.08 * r, xx, c0 + my + 0.1 * r], fill=dark, width=int(0.025 * r))
+    elif mood == "think":
+        d.line([c0 - 0.05 * r, c0 + my + 0.02 * r, c0 + 0.2 * r, c0 + my - 0.03 * r], fill=dark, width=bw)
+    else:  # worried / scared: wavy
+        pts = [(c0 + (-0.2 + 0.4 * i / 8) * r, c0 + my + 0.04 * r * math.sin(i * 1.6)) for i in range(9)]
+        d.line(pts, fill=dark, width=bw)
+    im = im.resize((S // ss, S // ss), Image.LANCZOS)
+    return pil_to_f(im)
+
+
+MOODS = ["shock", "cool", "worried", "think", "scared", "cold", "happy", "happy"]
+
+
+def MASCOT(img, t):
+    si = scene_at(t)
+    lt = t - SC[si]
+    mood = MOODS[min(si, len(MOODS) - 1)]
+    R = 72
+    pop = back_out(lt / 0.3, 2.0)
+    x = 935 + (math.sin(t * 40) * 4 if mood in ("cold", "scared") else 0)
+    y = 1165 + 8 * math.sin(t * 2.2)
+    col = {"cold": (0.45, 0.65, 1.0), "scared": (0.12, 0.25, 0.35), "cool": (1.0, 0.75, 0.3)}.get(mood, (0.25, 0.8, 1.0))
+    Rs = max(4, int(R * (0.85 + 0.15 * pop)))
+    if mood != "scared":
+        blit(img, blob(int(Rs * 1.8), col, 2.5), x, y, 0.45, add=True)
+    # electron rings
+    patch = np.zeros((Rs * 4, Rs * 4, 3), np.uint8)
+    for k in range(2):
+        ang = 25 + k * 110
+        cv2.ellipse(patch, (Rs * 2, Rs * 2), (int(Rs * 1.55), int(Rs * 0.45)), ang, 0, 360, tuple(int(v * 140) for v in col), 3, cv2.LINE_AA)
+        th = t * (2.5 + k) + k
+        a = math.radians(ang)
+        px = Rs * 1.55 * math.cos(th)
+        py = Rs * 0.45 * math.sin(th)
+        ex_, ey_ = int(Rs * 2 + px * math.cos(a) - py * math.sin(a)), int(Rs * 2 + px * math.sin(a) + py * math.cos(a))
+        cv2.circle(patch, (ex_, ey_), max(3, Rs // 9), (255, 255, 255), -1, cv2.LINE_AA)
+    x0, y0 = int(x - Rs * 2), int(y - Rs * 2)
+    sl = img[max(0, y0):y0 + Rs * 4, max(0, x0):x0 + Rs * 4]
+    sl += patch[: sl.shape[0], : sl.shape[1]].astype(np.float32) / 255 * (0.35 if mood == "scared" else 0.9)
+    blit(img, sphere(Rs, col), x, y)
+    blink = (t % 3.7) < 0.12
+    look = {"worried": (-0.3, -1.0), "think": (-0.8, -0.9), "scared": (math.sin(t * 9) * 0.8, 0)}.get(mood, (0, 0))
+    face = mascot_face(Rs, mood, blink, round(look[0], 1), round(look[1], 1))
+    blit(img, face, x, y)
+    if mood == "cold":
+        blit(img, emoji("\u2744\uFE0F", 44), x - Rs, y - Rs, 0.9)
 
 
 SCENES = [s3_hook, s3_notice, s3_light, s3_orbit, s3_dark, s3_fly, s3_cta, s_end]

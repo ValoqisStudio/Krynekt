@@ -738,7 +738,7 @@ def emoji_pops(img, t):
             M = cv2.getRotationMatrix2D((w / 2, h / 2), rot, sc)
             M[0, 2] += 40; M[1, 2] += 40
             spr = cv2.warpAffine(spr, M, (w + 80, h + 80))
-            x = 900 if i % 2 else 180
+            x = 180
             blit(img, spr, x, 1130 - 20 * math.sin(k * 6))
 
 
@@ -820,6 +820,8 @@ def frame(i):
             blit(img, cv2.resize(pill, None, fx=sc_, fy=sc_), 500, 150, a)
             blit(img, cv2.resize(ht, None, fx=sc_, fy=sc_), 500 - 40 * sc_, 150, a)
             blit(img, emoji("\U0001F92F", int(86 * sc_) + 1), 500 + (bw / 2 - 60) * sc_, 150, a)
+    if "MASCOT" in globals():
+        MASCOT(img, t)
     emoji_pops(img, t)
     captions(img, t)
     if t < SC[-2]:
