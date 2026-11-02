@@ -63,7 +63,7 @@ put(impact(), sc[1] - 0.7); put(crackle(), sc[1] - 0.7)
 x = sc[2]
 while x < sc[3] - 0.2:
     put(tick(), x, 1.0, 0.7); x += 0.5
-off = sc[4] + (sc[5] - sc[4]) * 0.55
+off = sc[4] + (sc[5] - sc[4]) * 0.7
 x = sc[4]
 while x < off - 0.1:
     put(tick() * 1.3, x, 1.0, 0.7); x += 0.33

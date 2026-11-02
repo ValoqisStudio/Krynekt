@@ -220,7 +220,7 @@ def s3_orbit(c, lt, p, t, dur):
 
 def s3_dark(c, lt, p, t, dur):
     cam = dict(scale=1.0 + 0.08 * p, cx=540, cy=760, shake=0.0, desat=0.0)
-    off = dur * 0.55
+    off = dur * 0.7
     night = 0.0 if lt < off else min(1.0, (lt - off) / 0.12)
     draw_earth(c, 540, 1080, 520, t, light=(-0.6, -1.0), night=night * 0.93)
     if lt < off:

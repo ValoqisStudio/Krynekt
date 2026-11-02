@@ -1,0 +1,8 @@
+{"src":"voice3.mp3","out_wav":"voice3_clean.wav","out_json":"timing_sonne.json","end":48.3,
+ "cuts":[[0,1.95],[5.35,6.85],[25.95,27.65],[29.8,30.9],[36.5,38.2]],
+ "regions":{"1":"Was wäre, wenn die Sonne genau jetzt verschwindet?","3":"Die Antwort:","4":"Du merkst es nicht.",
+  "5":"Acht Minuten und zwanzig Sekunden lang scheint sie einfach weiter.","6":"Denn so lange braucht ihr Licht bis zu uns.",
+  "7":"Und auch die Erde kreist weiter.","8":"Um eine Sonne, die es gar nicht mehr gibt.","9":"Denn auch die Schwerkraft ist nur so schnell wie das Licht.",
+  "11":"Dann,","12":"ganz plötzlich…","14":"wird es dunkel.","15":"Und die Erde fliegt geradeaus hinaus ins eiskalte All.",
+  "17":"Und was danach mit uns passiert?","18":"Das zeige ich dir in Teil zwei.","19":"Willst du ihn sehen?","20":"Schreib „Teil zwei“ in die Kommentare."},
+ "scene_words":[["Die",0],["Acht",0],["Und",10],["Dann,",0],["Und",25],["Und",30]]}
