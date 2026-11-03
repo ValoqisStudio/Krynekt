@@ -87,8 +87,9 @@ for k_ in TOP_KEYS:
     _prev = TOP_T[-1]
 OWN_T = _wstart("eigene", SC[1]) or SC[1] + 2
 ASK_T = _wstart("ali,", SC[1] + 3) or (SC[2] - 1.4)
+ESK_T = _wstart("eskaliert", SC[1]) or (SC[1] + 99)
 HEUTE_T = _wstart("heute", SC[3]) or SC[3] + 0.3
-HOLT_T = _wstart("holt", SC[3]) or SC[3] + 2.5
+HOLT_T = _wstart("geht", SC[3]) or SC[3] + 2.5
 # map build-schedule to narrator cues
 STARTS = [x - SC[1] for x in TOP_T[:7]]
 HONEY_START = TOP_T[7] - SC[1]
@@ -128,6 +129,7 @@ def k2_build(c, lt, p, t, dur):
         draw_pizza(c, 540, 900, pz, lt * 6, t, steam=False)
         neon(c, "THE PIZZARY", 540, 300, 120, t)
         slam(c, "EIGENE PIZZA!", t - OWN_T, (255, 255, 255), 110, -5, 470)
+        slam(c, "ESKALIERT", t - ESK_T, (255, 60, 50), 130, 6, 600)
         if 0 <= t - OWN_T < 0.25:
             cam["shake"] = 14
     else:
@@ -149,7 +151,7 @@ def k2_build(c, lt, p, t, dur):
             c.circle(330 + i * 60, 1330, 13, (YELLOW if on else np.array([0.3, 0.3, 0.35])), -1)
     k = t - ASK_T
     if k > 0:
-        sticker(c, "WAS KOSTET SIE?", 540, 470, 96, (255, 255, 255), 14, (0, 0, 0), rot=4, scale=back_out(k / 0.2, 2.0))
+        sticker(c, "WAS ZAHLT MAN?", 540, 470, 96, (255, 255, 255), 14, (0, 0, 0), rot=4, scale=back_out(k / 0.2, 2.0))
     werbung(c)
     return cam
 
@@ -185,7 +187,7 @@ def k2_end(c, lt, p, t, dur):
         blit(c.img, txt("BERLIN", 70, (255, 226, 26), 10, (0, 0, 0), F_BLACK, True), 540, 1260, ease((lt - 0.6) * 3))
     kk = t - HOLT_T
     if kk > 0:
-        slam(c, "HOLT SIE EUCH!", min(kk, 0.9), (255, 255, 255), 120, -5, 470)
+        slam(c, "GEHT HIN!", min(kk, 0.9), (255, 255, 255), 140, -5, 470)
         if kk < 0.25:
             cam["shake"] = 18
     werbung(c)
